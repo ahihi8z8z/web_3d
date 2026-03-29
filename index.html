@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ngoi Nha Lo Lo Chai - Interactive Room</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    :root {
+      --bg: #1a0f08;
+      --surface: #f5ead8;
+      --earth: #6B3A1F;
+      --gold: #C8963E;
+      --indigo: #2D3A6B;
+      --glow: rgba(200,150,62,0.35);
+      --panel-border: #C8963E;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'Lora', serif;
+      color: var(--earth);
+      overflow-x: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    #site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: linear-gradient(180deg, rgba(26,15,8,0.95), rgba(26,15,8,0.7));
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+    }
+
+    #site-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+    }
+
+    #counter {
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      color: var(--surface);
+      opacity: 0.85;
+    }
+
+    #found-count {
+      font-weight: 700;
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+
+    #sound-toggle {
+      background: rgba(200,150,62,0.15);
+      border: 1px solid rgba(200,150,62,0.3);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Lora', serif;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    #sound-toggle:hover {
+      background: rgba(200,150,62,0.25);
+      border-color: var(--gold);
+    }
+
+    /* ===== INTRO OVERLAY ===== */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,15,8,0.92);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      backdrop-filter: blur(12px);
+    }
+
+    #intro-overlay h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    #intro-overlay p {
+      font-family: 'Lora', serif;
+      color: var(--surface);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin-bottom: 32px;
+      opacity: 0.85;
+    }
+
+    #intro-overlay .intro-quote {
+      font-style: italic;
+      color: var(--gold);
+      opacity: 0.7;
+      font-size: 0.9rem;
+      max-width: 520px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    #start-btn {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--bg);
+      background: var(--gold);
+      border: none;
+      padding: 14px 40px;
+      border-radius: 30px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(200,150,62,0.3);
+    }
+    #start-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 30px rgba(200,150,62,0.5);
+    }
+
+    /* ===== SCENE ===== */
+    #scene-wrapper {
+      padding-top: 64px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    #scene {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    #room-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Placeholder room background using CSS */
+    .room-placeholder {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.4) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(200,150,62,0.15) 0%, transparent 60%),
+        linear-gradient(180deg,
+          #3a2a1a 0%,
+          #2d1f12 15%,
+          #3a2816 30%,
+          #4a3520 45%,
+          #3d2a18 60%,
+          #5a4030 70%,
+          #6a5040 80%,
+          #504030 90%,
+          #3a2a1a 100%
+        );
+      position: relative;
+    }
+
+    /* Room interior elements drawn with CSS */
+    .room-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        /* Left wall */
+        linear-gradient(110deg, #8B7355 0%, #A0895E 2%, transparent 45%),
+        /* Right wall */
+        linear-gradient(-110deg, #7A6548 0%, #8B7355 2%, transparent 45%),
+        /* Floor */
+        linear-gradient(0deg, #5C5044 0%, #6B5D4E 20%, transparent 55%),
+        /* Roof line */
+        linear-gradient(180deg, #2D3A6B 0%, #3a4a7a 5%, transparent 18%),
+        /* Warm fire glow */
+        radial-gradient(circle at 20% 75%, rgba(255,120,30,0.25) 0%, transparent 25%);
+    }
+
+    .room-placeholder::after {
+      content: 'Nha Lo Lo Chai';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: rgba(200,150,62,0.15);
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* Stone wall texture strips */
+    .wall-texture {
+      position: absolute;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(120,110,100,0.3) 0px,
+        rgba(100,90,80,0.2) 8px,
+        rgba(130,120,110,0.3) 16px
+      );
+    }
+    .wall-left {
+      left: 0; top: 15%; width: 40%; height: 55%;
+      transform: skewY(10deg);
+      opacity: 0.4;
+    }
+    .wall-right {
+      right: 0; top: 15%; width: 40%; height: 55%;
+      transform: skewY(-10deg);
+      opacity: 0.4;
+    }
+
+    /* ===== HOTSPOTS ===== */
+    .hotspot {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .hotspot-dot {
+      width: 16px;
+      height: 16px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px var(--glow);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .hotspot-ring {
+      width: 48px;
+      height: 48px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      position: absolute;
+      opacity: 0.6;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .hotspot-label {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Lora', serif;
+      font-size: 0.65rem;
+      color: var(--gold);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+
+    .hotspot:hover .hotspot-label {
+      opacity: 1;
+    }
+
+    .hotspot.discovered .hotspot-dot {
+      background: #888;
+      box-shadow: none;
+    }
+    .hotspot.discovered .hotspot-ring {
+      animation: none;
+      opacity: 0;
+    }
+    .hotspot.discovered .hotspot-label {
+      color: #888;
+    }
+
+    /* ===== SPECIAL EFFECTS ===== */
+    .hotspot.fx-flame-burst .hotspot-dot {
+      background: #ff6a00;
+      box-shadow: 0 0 20px rgba(255,106,0,0.6), 0 0 40px rgba(255,60,0,0.3);
+    }
+    .hotspot.fx-ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 60px; height: 60px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      animation: ripple-out 0.6s ease-out forwards;
+    }
+    @keyframes ripple-out {
+      to { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+    }
+    .hotspot.fx-pattern-glow .hotspot-dot {
+      background: linear-gradient(135deg, #ff4444, #ffaa00, #44ff44, #4444ff, #ff44ff);
+      background-size: 300% 300%;
+      animation: rainbow-shift 1s linear infinite;
+    }
+    @keyframes rainbow-shift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    .hotspot.fx-sparkle .hotspot-dot {
+      box-shadow: 0 0 8px var(--gold), 4px -4px 6px var(--gold), -4px -4px 6px var(--gold);
+    }
+    .hotspot.fx-sway {
+      animation: sway-anim 0.4s ease-in-out;
+    }
+    @keyframes sway-anim {
+      0% { transform: translate(-50%, -50%) translateX(0); }
+      25% { transform: translate(-50%, -50%) translateX(-5px); }
+      75% { transform: translate(-50%, -50%) translateX(5px); }
+      100% { transform: translate(-50%, -50%) translateX(0); }
+    }
+    .hotspot.fx-smoke-puff .hotspot-dot {
+      box-shadow: 0 -8px 16px rgba(180,170,160,0.4), 0 0 12px var(--glow);
+    }
+    .hotspot.fx-thread-weave .hotspot-ring {
+      border-style: dashed;
+      animation: spin-ring 1s linear;
+    }
+    @keyframes spin-ring {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== INFO PANEL ===== */
+    #info-panel {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: min(680px, 95vw);
+      background: var(--surface);
+      border: 1.5px solid var(--gold);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      padding: 28px 32px;
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
+      z-index: 100;
+      opacity: 0;
+    }
+
+    #panel-content {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    #panel-photo-wrap {
+      flex-shrink: 0;
+      width: 140px; height: 140px;
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      overflow: hidden;
+      background: #e8dcc8;
+    }
+
+    #panel-photo {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    #panel-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--earth);
+      margin: 0 0 4px;
+    }
+
+    #panel-name-en {
+      font-family: 'Lora', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    #panel-desc {
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      color: #4a3020;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    #panel-close {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--earth);
+      cursor: pointer;
+      opacity: 0.6;
+      width: 32px; height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    #panel-close:hover {
+      opacity: 1;
+      background: rgba(107,58,31,0.1);
+    }
+
+    /* ===== COMPLETION OVERLAY ===== */
+    #completion-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,15,8,0.9);
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      backdrop-filter: blur(8px);
+    }
+
+    #completion-overlay h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    #completion-overlay p {
+      color: var(--surface);
+      font-size: 1rem;
+      opacity: 0.8;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    /* ===== SCENE OVERLAY (dim) ===== */
+    #scene-dim {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      pointer-events: none;
+      z-index: 5;
+      transition: background 0.3s;
+    }
+    #scene-dim.active {
+      background: rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- INTRO OVERLAY -->
+  <div id="intro-overlay">
+    <h2>Ngoi Nha Lo Lo Chai</h2>
+    <p class="intro-quote">
+      "Buoc vao ngoi nha da cua nguoi Lo Lo Chai -- noi ngon lua bep khong bao gio tat,
+      tieng khung cui van vang, va moi tam vai theu om tron ban sac tram nam.
+      Chin vat pham, chin manh hon dan toc dang cho ban kham pha."
+    </p>
+    <p>
+      Chao mung ban den voi ngoi nha cua nguoi Lo Lo Chai -- noi dia dau cuc Bac To quoc,
+      duoi chan cot co Lung Cu, Ha Giang. Cung kham pha nhung cau chuyen van hoa
+      duoc ke qua vat pham truyen thong cua con nguoi noi day.
+    </p>
+    <button id="start-btn">Kham Pha Ngoi Nha</button>
+  </div>
+
+  <!-- HEADER -->
+  <header id="site-header">
+    <h1>Ngoi Nha Lo Lo Chai</h1>
+    <div id="counter">
+      <span id="found-count">0</span>
+      <span> / 9 vat pham</span>
+    </div>
+    <button id="sound-toggle">&#x1f50a; Sound</button>
+  </header>
+
+  <!-- SCENE -->
+  <div id="scene-wrapper">
+    <div id="scene">
+      <div class="room-placeholder">
+        <div class="wall-texture wall-left"></div>
+        <div class="wall-texture wall-right"></div>
+      </div>
+      <div id="scene-dim"></div>
+      <!-- Hotspots will be injected here by JS -->
+    </div>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div id="info-panel">
+    <button id="panel-close">&times;</button>
+    <div id="panel-content">
+      <div id="panel-photo-wrap">
+        <img id="panel-photo" src="" alt="" />
+      </div>
+      <div id="panel-text">
+        <h2 id="panel-name"></h2>
+        <p id="panel-name-en"></p>
+        <p id="panel-desc"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION OVERLAY -->
+  <div id="completion-overlay">
+    <h2>Ban da kham pha tat ca 9 vat pham!</h2>
+    <p>
+      Moi vat pham la mot manh ghep cua van hoa Lo Lo Chai --
+      tu ngon lua bep am cung den tieng trong dong vang vong.
+      Cam on ban da dong hanh tren hanh trinh nay.
+    </p>
+  </div>
+
+  <script>
+    // ===== ARTIFACT DATA =====
+    const ARTIFACTS = [
+      {
+        id: "bep-lua",
+        name: "Bep Lua",
+        nameEn: "Sacred Fireplace",
+        description: "Bep lua la trung tam cua khong gian sinh hoat trong ngoi nha truyen thong, noi gan voi viec nau an, suoi am va quay quan gia dinh. Ngon lua chua bao gio tat. Day la chi tiet quan trong giup toan bo goc nha co hon va co hoi tho doi song.",
+        photo: "assets/artifacts/01-bep-lua.png",
+        x: 18, y: 72,
+        sound: "fire",
+        specialEffect: "flame-burst"
+      },
+      {
+        id: "noi-dong",
+        name: "Noi Dong",
+        nameEn: "Bronze Pot",
+        description: "Noi dong la vat dung quen thuoc trong gian bep truyen thong, goi cam giac doi song gia dinh moc mac va gian di. Khi dat tren bep lua, noi dong giup canh vat tro nen sinh dong va tu nhien hon.",
+        photo: "assets/artifacts/02-noi-dong.png",
+        x: 25, y: 65,
+        sound: null,
+        specialEffect: "smoke-puff"
+      },
+      {
+        id: "gui-tre",
+        name: "Gui Tre",
+        nameEn: "Bamboo Basket",
+        description: "Gui tre la vat dung quen thuoc trong doi song cua nguoi dan vung cao, thuong dung de mang do, dung nong san hoac vat dung hang ngay. Dua gui vao mo hinh se giup goc nha them tu nhien va giau ban sac dia phuong.",
+        photo: "assets/artifacts/03-gui-tre.png",
+        x: 32, y: 68,
+        sound: null,
+        specialEffect: "sway"
+      },
+      {
+        id: "trong-dong",
+        name: "Trong Dong",
+        nameEn: "Bronze Drum",
+        description: "Trong dong la bieu tuong van hoa dac trung, gan voi doi song tinh than va ban sac cua cong dong Lo Lo. Tieng trong vang len moi dip le hoi. Du duoc cach dieu theo phong cach chibi, vat pham nay van can giu net trang trong va noi bat.",
+        photo: "assets/artifacts/04-trong-dong.png",
+        x: 12, y: 58,
+        sound: "drum",
+        specialEffect: "ripple"
+      },
+      {
+        id: "vay-ao",
+        name: "Vay Ao Lo Lo",
+        nameEn: "Traditional Costume",
+        description: "Vay ao Lo Lo la trang phuc truyen thong dac trung nhat cua phu nu dan toc Lo Lo Chai, duoc may thu cong tu vai tho cam voi hoa van theu tay tinh xao, mau sac ruc ro mang dam ban sac van hoa mien nui.",
+        photo: "assets/artifacts/05-vay-ao.png",
+        x: 78, y: 38,
+        sound: null,
+        specialEffect: "pattern-glow"
+      },
+      {
+        id: "khung-cui",
+        name: "Khung Cui",
+        nameEn: "Weaving Loom",
+        description: "Khung cui det vai la dung cu truyen thong quan trong nhat trong van hoa nguoi Lo Lo Chai. Moi tam vai det ra deu gan lien voi trang phuc va le hoi. Khung cui mang den hoi tho hoai co, am ap cua cuoc song mien nui.",
+        photo: "assets/artifacts/06-khung-cui.png",
+        x: 70, y: 62,
+        sound: null,
+        specialEffect: "thread-weave"
+      },
+      {
+        id: "mu-trang-suc",
+        name: "Mu & Trang Suc",
+        nameEn: "Hat & Silver Jewelry",
+        description: "Mu truyen thong va trang suc bac la 'bau vat' khong the thieu cua phu nu Lo Lo -- vong co to ban, khuyen tai dai, lac tay che tac thu cong tinh xao. Khi dat tren ke trong ngoi nha Lo Lo, bo trang suc bac toat len ve dep hoai co, lap lanh.",
+        photo: "assets/artifacts/07-mu.png",
+        x: 82, y: 28,
+        sound: null,
+        specialEffect: "sparkle"
+      },
+      {
+        id: "phan-go",
+        name: "Phan Go",
+        nameEn: "Wooden Platform Bed",
+        description: "Phan go thap la noi ngoi nghi va sum vay gian di nhung tran day hoi am cua gia dinh nguoi Lo Lo Chai sau ngay lam nuong ray. Chiec phan go thap sat san giup giu am vao mua dong gia ret vung cao.",
+        photo: "assets/artifacts/08-phan-go.png",
+        x: 50, y: 55,
+        sound: null,
+        specialEffect: "sway"
+      },
+      {
+        id: "mam-go",
+        name: "Mam Go",
+        nameEn: "Wooden Tray",
+        description: "Mam go la vat dung quen thuoc trong bua an gia dinh nguoi Lo Lo Chai, noi moi nguoi quay quan ben mam com dan da. No tuong trung cho su doan ket, chia se va hieu khach cua cong dong.",
+        photo: "assets/artifacts/09-mam-go.png",
+        x: 45, y: 72,
+        sound: null,
+        specialEffect: null
+      }
+    ];
+
+    // ===== STATE =====
+    let discoveredCount = 0;
+    const discovered = new Set();
+    let panelOpen = false;
+    let soundOn = false;
+
+    // ===== INIT =====
+    window.addEventListener("DOMContentLoaded", () => {
+      initIntro();
+      initHotspots();
+      initPanelClose();
+      initSoundToggle();
+    });
+
+    // ===== INTRO =====
+    function initIntro() {
+      const overlay = document.getElementById("intro-overlay");
+      const btn = document.getElementById("start-btn");
+      btn.addEventListener("click", () => {
+        gsap.to(overlay, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => { overlay.style.display = "none"; }
+        });
+      });
+    }
+
+    // ===== HOTSPOTS =====
+    function initHotspots() {
+      const scene = document.getElementById("scene");
+      ARTIFACTS.forEach(artifact => {
+        const el = document.createElement("div");
+        el.className = "hotspot";
+        el.dataset.id = artifact.id;
+        el.style.left = artifact.x + "%";
+        el.style.top = artifact.y + "%";
+        el.innerHTML = `
+          <div class="hotspot-ring"></div>
+          <div class="hotspot-dot"></div>
+          <span class="hotspot-label">${artifact.name}</span>
+        `;
+
+        // Hover
+        el.addEventListener("mouseenter", () => {
+          if (panelOpen) return;
+          gsap.to(el.querySelector(".hotspot-dot"), {
+            scale: 1.4, duration: 0.3, ease: "back.out(2)"
+          });
+        });
+        el.addEventListener("mouseleave", () => {
+          gsap.to(el.querySelector(".hotspot-dot"), {
+            scale: 1, duration: 0.3, ease: "power2.out"
+          });
+        });
+
+        // Click
+        el.addEventListener("click", () => onArtifactClick(artifact, el));
+        scene.appendChild(el);
+      });
+    }
+
+    // ===== ARTIFACT CLICK =====
+    function onArtifactClick(artifact, el) {
+      if (panelOpen) return;
+
+      // Mark discovered
+      if (!discovered.has(artifact.id)) {
+        discovered.add(artifact.id);
+        discoveredCount++;
+        document.getElementById("found-count").textContent = discoveredCount;
+        el.classList.add("discovered");
+
+        // Check completion
+        if (discoveredCount === 9) {
+          setTimeout(showCompletion, 1500);
+        }
+      }
+
+      // Phase 1: bounce
+      const tl1 = gsap.timeline();
+      tl1.to(el, { scale: 1.3, duration: 0.1, ease: "power2.out" })
+         .to(el, { scale: 0.9, duration: 0.1 })
+         .to(el, { scale: 1.0, duration: 0.1 });
+
+      // Special effect
+      if (artifact.specialEffect) {
+        el.classList.add("fx-" + artifact.specialEffect);
+        setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 800);
+      }
+
+      // Dim others
+      document.querySelectorAll(".hotspot").forEach(h => {
+        if (h !== el) gsap.to(h, { opacity: 0.3, duration: 0.3 });
+      });
+      document.getElementById("scene-dim").classList.add("active");
+
+      // Sound stub
+      if (artifact.sound) {
+        console.log("sound:", artifact.sound);
+      }
+
+      // Open panel
+      openPanel(artifact);
+    }
+
+    // ===== PANEL =====
+    function openPanel(artifact) {
+      panelOpen = true;
+      const panel = document.getElementById("info-panel");
+      const photo = document.getElementById("panel-photo");
+      const name = document.getElementById("panel-name");
+      const nameEn = document.getElementById("panel-name-en");
+      const desc = document.getElementById("panel-desc");
+
+      photo.src = artifact.photo;
+      photo.alt = artifact.name;
+      name.textContent = artifact.name;
+      nameEn.textContent = artifact.nameEn;
+      desc.textContent = artifact.description;
+
+      // Animate panel up
+      gsap.fromTo(panel,
+        { y: "100%", opacity: 0 },
+        { y: "0%", opacity: 1, duration: 0.35, ease: "power3.out", delay: 0.2 }
+      );
+
+      // Animate content in
+      const tl = gsap.timeline({ delay: 0.5 });
+      tl.fromTo("#panel-photo", { opacity: 0 }, { opacity: 1, duration: 0.2 })
+        .fromTo("#panel-name", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2 })
+        .fromTo("#panel-name-en", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.15 })
+        .fromTo("#panel-desc", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 });
+    }
+
+    function closePanel() {
+      gsap.to("#info-panel", {
+        y: "100%", opacity: 0, duration: 0.3, ease: "power2.in",
+        onComplete: () => {
+          panelOpen = false;
+          document.querySelectorAll(".hotspot").forEach(h => {
+            gsap.to(h, { opacity: 1, duration: 0.3 });
+          });
+          document.getElementById("scene-dim").classList.remove("active");
+        }
+      });
+    }
+
+    function initPanelClose() {
+      document.getElementById("panel-close").addEventListener("click", closePanel);
+      // Click outside panel to close
+      document.addEventListener("click", (e) => {
+        if (!panelOpen) return;
+        const panel = document.getElementById("info-panel");
+        if (!panel.contains(e.target) && !e.target.closest(".hotspot")) {
+          closePanel();
+        }
+      });
+      // Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && panelOpen) closePanel();
+      });
+    }
+
+    // ===== SOUND TOGGLE =====
+    function initSoundToggle() {
+      const btn = document.getElementById("sound-toggle");
+      btn.addEventListener("click", () => {
+        soundOn = !soundOn;
+        btn.innerHTML = soundOn ? "&#x1f50a; Sound On" : "&#x1f507; Sound Off";
+        console.log("Sound toggled:", soundOn);
+      });
+    }
+
+    // ===== COMPLETION =====
+    function showCompletion() {
+      const overlay = document.getElementById("completion-overlay");
+      overlay.style.display = "flex";
+      gsap.fromTo(overlay,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: "power2.out" }
+      );
+    }
+  </script>
+</body>
+</html>
