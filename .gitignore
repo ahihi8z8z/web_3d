@@ -1,0 +1,5 @@
+image/
+content.pdf
+prompt.md
+.vercel/
+node_modules/
