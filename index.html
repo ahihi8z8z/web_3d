@@ -148,90 +148,15 @@
     #scene {
       position: relative;
       width: 100%;
-      max-width: 1200px;
-      aspect-ratio: 16 / 10;
+      max-width: 1000px;
       overflow: hidden;
       border-radius: 8px;
     }
 
     #room-bg {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
-    }
-
-    /* Placeholder room background using CSS */
-    .room-placeholder {
-      width: 100%;
-      height: 100%;
-      background:
-        radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.4) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(200,150,62,0.15) 0%, transparent 60%),
-        linear-gradient(180deg,
-          #3a2a1a 0%,
-          #2d1f12 15%,
-          #3a2816 30%,
-          #4a3520 45%,
-          #3d2a18 60%,
-          #5a4030 70%,
-          #6a5040 80%,
-          #504030 90%,
-          #3a2a1a 100%
-        );
-      position: relative;
-    }
-
-    /* Room interior elements drawn with CSS */
-    .room-placeholder::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        /* Left wall */
-        linear-gradient(110deg, #8B7355 0%, #A0895E 2%, transparent 45%),
-        /* Right wall */
-        linear-gradient(-110deg, #7A6548 0%, #8B7355 2%, transparent 45%),
-        /* Floor */
-        linear-gradient(0deg, #5C5044 0%, #6B5D4E 20%, transparent 55%),
-        /* Roof line */
-        linear-gradient(180deg, #2D3A6B 0%, #3a4a7a 5%, transparent 18%),
-        /* Warm fire glow */
-        radial-gradient(circle at 20% 75%, rgba(255,120,30,0.25) 0%, transparent 25%);
-    }
-
-    .room-placeholder::after {
-      content: 'Nha Lo Lo Chai';
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Playfair Display', serif;
-      font-size: 2.5rem;
-      color: rgba(200,150,62,0.15);
-      letter-spacing: 0.1em;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    /* Stone wall texture strips */
-    .wall-texture {
-      position: absolute;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(120,110,100,0.3) 0px,
-        rgba(100,90,80,0.2) 8px,
-        rgba(130,120,110,0.3) 16px
-      );
-    }
-    .wall-left {
-      left: 0; top: 15%; width: 40%; height: 55%;
-      transform: skewY(10deg);
-      opacity: 0.4;
-    }
-    .wall-right {
-      right: 0; top: 15%; width: 40%; height: 55%;
-      transform: skewY(-10deg);
-      opacity: 0.4;
     }
 
     /* ===== HOTSPOTS ===== */
@@ -509,10 +434,7 @@
   <!-- SCENE -->
   <div id="scene-wrapper">
     <div id="scene">
-      <div class="room-placeholder">
-        <div class="wall-texture wall-left"></div>
-        <div class="wall-texture wall-right"></div>
-      </div>
+      <img id="room-bg" src="assets/scene/room-bg.png" alt="Lo Lo Chai Room" />
       <div id="scene-dim"></div>
       <!-- Hotspots will be injected here by JS -->
     </div>
@@ -552,7 +474,7 @@
         nameEn: "Sacred Fireplace",
         description: "Bep lua la trung tam cua khong gian sinh hoat trong ngoi nha truyen thong, noi gan voi viec nau an, suoi am va quay quan gia dinh. Ngon lua chua bao gio tat. Day la chi tiet quan trong giup toan bo goc nha co hon va co hoi tho doi song.",
         photo: "assets/artifacts/01-bep-lua.png",
-        x: 18, y: 72,
+        x: 28, y: 78,
         sound: "fire",
         specialEffect: "flame-burst"
       },
@@ -562,7 +484,7 @@
         nameEn: "Bronze Pot",
         description: "Noi dong la vat dung quen thuoc trong gian bep truyen thong, goi cam giac doi song gia dinh moc mac va gian di. Khi dat tren bep lua, noi dong giup canh vat tro nen sinh dong va tu nhien hon.",
         photo: "assets/artifacts/02-noi-dong.png",
-        x: 25, y: 65,
+        x: 22, y: 70,
         sound: null,
         specialEffect: "smoke-puff"
       },
@@ -572,7 +494,7 @@
         nameEn: "Bamboo Basket",
         description: "Gui tre la vat dung quen thuoc trong doi song cua nguoi dan vung cao, thuong dung de mang do, dung nong san hoac vat dung hang ngay. Dua gui vao mo hinh se giup goc nha them tu nhien va giau ban sac dia phuong.",
         photo: "assets/artifacts/03-gui-tre.png",
-        x: 32, y: 68,
+        x: 38, y: 82,
         sound: null,
         specialEffect: "sway"
       },
@@ -582,7 +504,7 @@
         nameEn: "Bronze Drum",
         description: "Trong dong la bieu tuong van hoa dac trung, gan voi doi song tinh than va ban sac cua cong dong Lo Lo. Tieng trong vang len moi dip le hoi. Du duoc cach dieu theo phong cach chibi, vat pham nay van can giu net trang trong va noi bat.",
         photo: "assets/artifacts/04-trong-dong.png",
-        x: 12, y: 58,
+        x: 15, y: 75,
         sound: "drum",
         specialEffect: "ripple"
       },
@@ -592,7 +514,7 @@
         nameEn: "Traditional Costume",
         description: "Vay ao Lo Lo la trang phuc truyen thong dac trung nhat cua phu nu dan toc Lo Lo Chai, duoc may thu cong tu vai tho cam voi hoa van theu tay tinh xao, mau sac ruc ro mang dam ban sac van hoa mien nui.",
         photo: "assets/artifacts/05-vay-ao.png",
-        x: 78, y: 38,
+        x: 80, y: 42,
         sound: null,
         specialEffect: "pattern-glow"
       },
@@ -602,7 +524,7 @@
         nameEn: "Weaving Loom",
         description: "Khung cui det vai la dung cu truyen thong quan trong nhat trong van hoa nguoi Lo Lo Chai. Moi tam vai det ra deu gan lien voi trang phuc va le hoi. Khung cui mang den hoi tho hoai co, am ap cua cuoc song mien nui.",
         photo: "assets/artifacts/06-khung-cui.png",
-        x: 70, y: 62,
+        x: 72, y: 72,
         sound: null,
         specialEffect: "thread-weave"
       },
@@ -612,7 +534,7 @@
         nameEn: "Hat & Silver Jewelry",
         description: "Mu truyen thong va trang suc bac la 'bau vat' khong the thieu cua phu nu Lo Lo -- vong co to ban, khuyen tai dai, lac tay che tac thu cong tinh xao. Khi dat tren ke trong ngoi nha Lo Lo, bo trang suc bac toat len ve dep hoai co, lap lanh.",
         photo: "assets/artifacts/07-mu.png",
-        x: 82, y: 28,
+        x: 85, y: 35,
         sound: null,
         specialEffect: "sparkle"
       },
@@ -622,7 +544,7 @@
         nameEn: "Wooden Platform Bed",
         description: "Phan go thap la noi ngoi nghi va sum vay gian di nhung tran day hoi am cua gia dinh nguoi Lo Lo Chai sau ngay lam nuong ray. Chiec phan go thap sat san giup giu am vao mua dong gia ret vung cao.",
         photo: "assets/artifacts/08-phan-go.png",
-        x: 50, y: 55,
+        x: 50, y: 65,
         sound: null,
         specialEffect: "sway"
       },
@@ -632,7 +554,7 @@
         nameEn: "Wooden Tray",
         description: "Mam go la vat dung quen thuoc trong bua an gia dinh nguoi Lo Lo Chai, noi moi nguoi quay quan ben mam com dan da. No tuong trung cho su doan ket, chia se va hieu khach cua cong dong.",
         photo: "assets/artifacts/09-mam-go.png",
-        x: 45, y: 72,
+        x: 55, y: 75,
         sound: null,
         specialEffect: null
       }
