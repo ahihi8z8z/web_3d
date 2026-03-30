@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ngôi Nhà Lô Lô Chải - Interactive Room</title>
+  <title>Ngôi Nhà Lô Lô Chải - Sắp Xếp Căn Phòng</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
@@ -20,10 +20,12 @@
 
     body {
       background: var(--bg);
-      min-height: 100vh;
+      height: 100vh;
       font-family: 'Lora', serif;
       color: var(--earth);
-      overflow-x: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ===== HEADER ===== */
@@ -31,121 +33,50 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 32px;
-      background: linear-gradient(180deg, rgba(26,15,8,0.95), rgba(26,15,8,0.7));
-      position: fixed;
-      top: 0; left: 0; right: 0;
+      padding: 10px 24px;
+      background: linear-gradient(180deg, rgba(26,15,8,0.95), rgba(26,15,8,0.8));
+      flex-shrink: 0;
       z-index: 50;
-      backdrop-filter: blur(8px);
     }
     #site-header h1 {
       font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       color: var(--gold);
       letter-spacing: 0.04em;
     }
     #counter {
       font-family: 'Lora', serif;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: var(--surface);
       opacity: 0.85;
     }
     #found-count {
       font-weight: 700;
       color: var(--gold);
-      font-size: 1.1rem;
-    }
-    #sound-toggle {
-      background: rgba(200,150,62,0.15);
-      border: 1px solid rgba(200,150,62,0.3);
-      color: var(--gold);
-      padding: 6px 14px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-family: 'Lora', serif;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-    #sound-toggle:hover {
-      background: rgba(200,150,62,0.25);
-      border-color: var(--gold);
-    }
-
-    /* ===== INTRO OVERLAY ===== */
-    #intro-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(26,15,8,0.92);
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px;
-      backdrop-filter: blur(12px);
-    }
-    #intro-overlay h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: var(--gold);
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-    #intro-overlay p {
-      font-family: 'Lora', serif;
-      color: var(--surface);
       font-size: 1rem;
-      line-height: 1.7;
-      max-width: 600px;
-      margin-bottom: 32px;
-      opacity: 0.85;
-    }
-    #intro-overlay .intro-quote {
-      font-style: italic;
-      color: var(--gold);
-      opacity: 0.7;
-      font-size: 0.9rem;
-      max-width: 520px;
-      margin-bottom: 28px;
-      line-height: 1.6;
-    }
-    #start-btn {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      color: var(--bg);
-      background: var(--gold);
-      border: none;
-      padding: 14px 40px;
-      border-radius: 30px;
-      cursor: pointer;
-      letter-spacing: 0.06em;
-      transition: all 0.3s;
-      box-shadow: 0 4px 20px rgba(200,150,62,0.3);
-    }
-    #start-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 30px rgba(200,150,62,0.5);
     }
 
     /* ===== SCENE ===== */
     #scene-wrapper {
-      padding-top: 64px;
+      flex: 1;
       display: flex;
       justify-content: center;
-      min-height: 100vh;
-      align-items: flex-start;
+      align-items: center;
+      overflow: hidden;
+      padding: 8px;
     }
     #scene {
       position: relative;
-      width: 100%;
-      max-width: 1000px;
+      height: 100%;
+      max-height: calc(100vh - 100px);
+      aspect-ratio: 1 / 1;
       overflow: hidden;
       border-radius: 8px;
     }
     #room-bg {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: contain;
       display: block;
     }
 
@@ -162,14 +93,13 @@
       background: rgba(0,0,0,0.35);
     }
 
-    /* ===== ARTIFACT (clickable item on room) ===== */
+    /* ===== ARTIFACT (item on room) ===== */
     .artifact {
       position: absolute;
-      cursor: pointer;
+      cursor: grab;
       z-index: 10;
       transition: filter 0.3s;
-      /* transform origin at bottom center for natural scaling */
-      transform-origin: bottom center;
+      transform-origin: center center;
     }
     .artifact img {
       width: 100%;
@@ -177,6 +107,9 @@
       object-fit: contain;
       pointer-events: none;
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
+    }
+    .artifact:active {
+      cursor: grabbing;
     }
 
     /* Gold glow indicator for undiscovered */
@@ -197,12 +130,10 @@
       50% { opacity: 1; transform: translateX(-50%) scale(1.3); }
     }
 
-    /* Pulsing ring indicator */
     .artifact .artifact-ring {
       position: absolute;
       top: 50%; left: 50%;
-      width: 80%;
-      height: 80%;
+      width: 80%; height: 80%;
       border: 2px solid var(--gold);
       border-radius: 50%;
       transform: translate(-50%, -50%) scale(0.8);
@@ -215,26 +146,19 @@
       100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
     }
 
-    .artifact.discovered::after {
-      animation: none;
-      opacity: 0;
-    }
-    .artifact.discovered .artifact-ring {
-      animation: none;
-      opacity: 0;
-    }
+    .artifact.discovered::after { animation: none; opacity: 0; }
+    .artifact.discovered .artifact-ring { animation: none; opacity: 0; }
     .artifact.discovered img {
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)) brightness(0.7) saturate(0.4);
     }
 
-    /* Artifact label */
     .artifact-label {
       position: absolute;
-      bottom: -20px;
+      bottom: -18px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Playfair Display', serif;
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: var(--gold);
       white-space: nowrap;
       opacity: 0;
@@ -243,22 +167,24 @@
       pointer-events: none;
       font-weight: 600;
     }
-    .artifact:hover .artifact-label {
-      opacity: 1;
-    }
+    .artifact:hover .artifact-label { opacity: 1; }
+    .artifact.selected { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 
-    /* ===== DECOR (non-clickable) ===== */
+    /* ===== DECOR (also draggable) ===== */
     .decor {
       position: absolute;
-      pointer-events: none;
+      cursor: grab;
       z-index: 8;
     }
     .decor img {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      pointer-events: none;
       filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.3));
     }
+    .decor:active { cursor: grabbing; }
+    .decor.selected { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 
     /* ===== SPECIAL EFFECTS ===== */
     .artifact.fx-flame-burst img {
@@ -284,26 +210,18 @@
     .artifact.fx-sparkle img {
       filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(3px -3px 6px var(--gold)) drop-shadow(-3px -3px 6px var(--gold)) brightness(1.2);
     }
-    .artifact.fx-sway {
-      animation: sway-anim 0.5s ease-in-out;
-    }
+    .artifact.fx-sway { animation: sway-anim 0.5s ease-in-out; }
     @keyframes sway-anim {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); }
-      100% { transform: translateX(0); }
+      0% { transform: translateX(0); } 25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); } 100% { transform: translateX(0); }
     }
     .artifact.fx-smoke-puff img {
       filter: drop-shadow(0 -10px 20px rgba(180,170,160,0.5)) drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
     }
-    .artifact.fx-thread-weave {
-      animation: thread-weave-anim 0.6s ease-in-out;
-    }
+    .artifact.fx-thread-weave { animation: thread-weave-anim 0.6s ease-in-out; }
     @keyframes thread-weave-anim {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(-2deg); }
-      75% { transform: rotate(2deg); }
-      100% { transform: rotate(0deg); }
+      0% { transform: rotate(0deg); } 25% { transform: rotate(-2deg); }
+      75% { transform: rotate(2deg); } 100% { transform: rotate(0deg); }
     }
 
     /* ===== INFO PANEL ===== */
@@ -316,74 +234,63 @@
       border: 1.5px solid var(--gold);
       border-bottom: none;
       border-radius: 20px 20px 0 0;
-      padding: 28px 32px;
+      padding: 24px 28px;
       box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
       z-index: 100;
       opacity: 0;
     }
-    #panel-content {
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-    }
+    #panel-content { display: flex; gap: 20px; align-items: flex-start; }
     #panel-photo-wrap {
       flex-shrink: 0;
-      width: 140px; height: 140px;
+      width: 120px; height: 120px;
       border-radius: 12px;
       border: 2px solid var(--gold);
       overflow: hidden;
       background: #e8dcc8;
     }
-    #panel-photo {
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
+    #panel-photo { width: 100%; height: 100%; object-fit: cover; }
     #panel-name {
       font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       color: var(--earth);
       margin: 0 0 4px;
     }
     #panel-name-en {
       font-family: 'Lora', serif;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--gold);
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
     #panel-desc {
       font-family: 'Lora', serif;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: #4a3020;
-      line-height: 1.65;
+      line-height: 1.6;
       margin: 0;
     }
     #panel-close {
       position: absolute;
-      top: 16px; right: 20px;
+      top: 12px; right: 16px;
       background: none;
       border: none;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       color: var(--earth);
       cursor: pointer;
       opacity: 0.6;
-      width: 32px; height: 32px;
+      width: 28px; height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
       transition: all 0.2s;
     }
-    #panel-close:hover {
-      opacity: 1;
-      background: rgba(107,58,31,0.1);
-    }
+    #panel-close:hover { opacity: 1; background: rgba(107,58,31,0.1); }
 
     /* ===== COMPLETION OVERLAY ===== */
     #completion-overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(26,15,8,0.9);
       z-index: 150;
       display: none;
@@ -396,36 +303,47 @@
     }
     #completion-overlay h2 {
       font-family: 'Playfair Display', serif;
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: var(--gold);
       margin-bottom: 16px;
     }
     #completion-overlay p {
       color: var(--surface);
-      font-size: 1rem;
+      font-size: 0.95rem;
       opacity: 0.8;
       max-width: 500px;
       line-height: 1.6;
     }
+
+    /* ===== EDITOR BAR ===== */
+    #editor-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: #222;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      z-index: 300;
+    }
+    #editor-bar .label { color: var(--gold); font-weight: bold; }
+    #editor-bar .hint { opacity: 0.6; }
+    #editor-bar button {
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
-
-  <!-- INTRO OVERLAY -->
-  <div id="intro-overlay">
-    <h2>Ngôi Nhà Lô Lô Chải</h2>
-    <p class="intro-quote">
-      "Bước vào ngôi nhà đá của người Lô Lô Chải — nơi ngọn lửa bếp không bao giờ tắt,
-      tiếng khung cửi vẫn vang, và mỗi tấm vải thêu ôm trọn bản sắc trăm năm.
-      Chín vật phẩm, chín mảnh hồn dân tộc đang chờ bạn khám phá."
-    </p>
-    <p>
-      Chào mừng bạn đến với ngôi nhà của người Lô Lô Chải — nơi địa đầu cực Bắc Tổ quốc,
-      dưới chân cột cờ Lũng Cú, Hà Giang. Cùng khám phá những câu chuyện văn hoá
-      được kể qua vật phẩm truyền thống của con người nơi đây.
-    </p>
-    <button id="start-btn">Khám Phá Ngôi Nhà</button>
-  </div>
 
   <!-- HEADER -->
   <header id="site-header">
@@ -434,7 +352,6 @@
       <span id="found-count">0</span>
       <span> / 9 vật phẩm</span>
     </div>
-    <button id="sound-toggle">&#x1f50a; Sound</button>
   </header>
 
   <!-- SCENE -->
@@ -442,8 +359,14 @@
     <div id="scene">
       <img id="room-bg" src="assets/scene/room-bg.png" alt="Lo Lo Chai Room" />
       <div id="scene-dim"></div>
-      <!-- Artifacts and decor injected by JS -->
     </div>
+  </div>
+
+  <!-- EDITOR BAR (always visible) -->
+  <div id="editor-bar">
+    <span class="label">SẮP XẾP CĂN PHÒNG</span>
+    <span id="editor-coords" class="hint">Kéo thả vật phẩm | Click chọn rồi: R xoay, +/- kích thước, F lật | Double-click xem chi tiết</span>
+    <button id="editor-export" style="margin-left:auto;">Export tọa độ</button>
   </div>
 
   <!-- INFO PANEL -->
@@ -472,11 +395,6 @@
   </div>
 
   <script>
-    // ===== ARTIFACT DATA =====
-    // Positions calibrated to Khung nhà 3D.PNG isometric room
-    // Room floor area: roughly x:15-85%, y:55-90%
-    // Left wall: x:5-48%, y:18-55%
-    // Right wall: x:48-92%, y:18-55%
     const ARTIFACTS = [
       {
         id: "bep-lua",
@@ -485,10 +403,8 @@
         description: "Bếp lửa là trung tâm của không gian sinh hoạt trong ngôi nhà truyền thống, nơi gắn với việc nấu ăn, sưởi ấm và quây quần gia đình. Ngọn lửa chưa bao giờ tắt. Đây là chi tiết quan trọng giúp toàn bộ góc nhà có hồn và có hơi thở đời sống.",
         photo: "assets/artifacts/01-bep-lua.png",
         sprite: "assets/artifacts/01-bep-lua-3d.png",
-        // "góc dưới bên trái sàn nhà"
-        x: 22, y: 74, w: 14, h: 12,
-        sound: "fire",
-        specialEffect: "flame-burst"
+        x: 22, y: 74, w: 14,
+        sound: "fire", specialEffect: "flame-burst"
       },
       {
         id: "noi-dong",
@@ -497,10 +413,8 @@
         description: "Nồi đồng là vật dụng quen thuộc trong gian bếp truyền thống, gợi cảm giác đời sống gia đình mộc mạc và giản dị. Khi đặt trên bếp lửa, nồi đồng giúp cảnh vật trở nên sinh động và tự nhiên hơn.",
         photo: "assets/artifacts/02-noi-dong.png",
         sprite: "assets/artifacts/02-noi-dong-3d.png",
-        // "ngay trên bếp lửa, góc dưới bên trái"
-        x: 20, y: 67, w: 8, h: 8,
-        sound: null,
-        specialEffect: "smoke-puff"
+        x: 20, y: 67, w: 8,
+        sound: null, specialEffect: "smoke-puff"
       },
       {
         id: "gui-tre",
@@ -509,10 +423,8 @@
         description: "Gùi tre là vật dụng quen thuộc trong đời sống của người dân vùng cao, thường dùng để mang đồ, đựng nông sản hoặc vật dụng hằng ngày. Đưa gùi vào mô hình sẽ giúp góc nhà thêm tự nhiên và giàu bản sắc địa phương.",
         photo: "assets/artifacts/03-gui-tre.png",
         sprite: "assets/artifacts/03-gui-tre-3d.png",
-        // "cạnh bên phải bếp lửa, lệch sang phải một chút"
-        x: 34, y: 73, w: 7, h: 10,
-        sound: null,
-        specialEffect: "sway"
+        x: 34, y: 73, w: 7,
+        sound: null, specialEffect: "sway"
       },
       {
         id: "trong-dong",
@@ -521,10 +433,8 @@
         description: "Trống đồng là biểu tượng văn hóa đặc trưng, gắn với đời sống tinh thần và bản sắc của cộng đồng Lô Lô. Tiếng trống vang lên mỗi dịp lễ hội. Dù được cách điệu theo phong cách chibi, vật phẩm này vẫn cần giữ nét trang trọng và nổi bật.",
         photo: "assets/artifacts/04-trong-dong.png",
         sprite: "assets/artifacts/04-trong-dong-3d.png",
-        // "gần cụm bếp, phía ngoài chếch về bên trái"
-        x: 14, y: 81, w: 9, h: 8,
-        sound: "drum",
-        specialEffect: "ripple"
+        x: 14, y: 81, w: 9,
+        sound: "drum", specialEffect: "ripple"
       },
       {
         id: "vay-ao",
@@ -533,10 +443,8 @@
         description: "Váy áo Lô Lô là trang phục truyền thống đặc trưng nhất của phụ nữ dân tộc Lô Lô Chải, được may thủ công từ vải thổ cẩm với những họa văn thêu tay tinh xảo, màu sắc rực rỡ mang đậm bản sắc văn hóa miền núi.",
         photo: "assets/artifacts/05-vay-ao.png",
         sprite: "assets/artifacts/05-vay-ao-3d.png",
-        // "treo trên móc gỗ ngay trên tường phải"
-        x: 76, y: 30, w: 9, h: 16,
-        sound: null,
-        specialEffect: "pattern-glow"
+        x: 76, y: 30, w: 9,
+        sound: null, specialEffect: "pattern-glow"
       },
       {
         id: "khung-cui",
@@ -545,10 +453,8 @@
         description: "Khung cửi dệt vải là dụng cụ truyền thống quan trọng nhất trong văn hóa người Lô Lô Chải, giúp các phụ nữ dân tộc dệt nên những tấm vải thổ cẩm với hoa văn độc đáo, rực rỡ. Không chỉ là công cụ lao động hàng ngày, khung cửi còn thể hiện sự khéo léo, cần cù và bản sắc văn hóa của cộng đồng.",
         photo: "assets/artifacts/06-khung-cui.png",
         sprite: "assets/artifacts/06-khung-cui-3d.png",
-        // "góc dưới phải, kế tường phải"
-        x: 68, y: 68, w: 14, h: 12,
-        sound: null,
-        specialEffect: "thread-weave"
+        x: 68, y: 68, w: 14,
+        sound: null, specialEffect: "thread-weave"
       },
       {
         id: "mu-trang-suc",
@@ -557,10 +463,8 @@
         description: "Mũ truyền thống là chi tiết nổi bật nhất trong trang phục phụ nữ Lô Lô Chải, được làm từ nhiều lớp vải thổ cẩm với màu sắc rực rỡ, hàng cúc kim loại và vô số tua rua, pom-pom xinh xắn. Trang sức bạc là \"báu vật\" không thể thiếu — vòng cổ to bản, khuyên tai dài, lắc tay chế tác thủ công tinh xảo từ bạc nguyên chất.",
         photo: "assets/artifacts/07-mu.png",
         sprite: "assets/artifacts/07-mu-3d.png",
-        // "trên tường phải, trên kệ gỗ"
-        x: 84, y: 32, w: 8, h: 12,
-        sound: null,
-        specialEffect: "sparkle"
+        x: 84, y: 32, w: 8,
+        sound: null, specialEffect: "sparkle"
       },
       {
         id: "phan-go",
@@ -569,10 +473,8 @@
         description: "Phản gỗ thấp là nơi ngồi nghỉ và sum vầy giản dị nhưng tràn đầy hơi ấm của gia đình người Lô Lô Chải sau ngày làm nương rẫy. Chiếc phản gỗ thấp sát sàn giúp giữ ấm vào mùa đông giá rét vùng cao, đồng thời thể hiện lối sống gần gũi với đất trời và truyền thống dân tộc.",
         photo: "assets/artifacts/08-phan-go.jpg",
         sprite: "assets/artifacts/08-phan-go-3d.png",
-        // "khu trung tâm sàn, hơi lùi về phía trong"
-        x: 46, y: 62, w: 16, h: 10,
-        sound: null,
-        specialEffect: "sway"
+        x: 46, y: 62, w: 16,
+        sound: null, specialEffect: "sway"
       },
       {
         id: "mam-go",
@@ -581,55 +483,44 @@
         description: "Mâm gỗ là vật dụng quen thuộc trong bữa ăn gia đình người Lô Lô Chải, nơi mọi người quây quần bên mâm cơm dân dã. Nó tượng trưng cho sự đoàn kết, chia sẻ và hiếu khách của cộng đồng. Chiếc mâm gỗ mộc mạc góp phần tạo nên không khí ấm cúng, gần gũi của ngôi nhà truyền thống vùng cao.",
         photo: "assets/artifacts/09-mam-go.jpg",
         sprite: "assets/artifacts/09-mam-go-3d.png",
-        // "trước phản gỗ, khu trung tâm"
-        x: 50, y: 74, w: 10, h: 7,
-        sound: null,
-        specialEffect: null
+        x: 50, y: 74, w: 10,
+        sound: null, specialEffect: null
       }
     ];
 
-    // Decorative items (non-clickable)
     const DECOR = [
-      { src: "assets/decor/goi.png", x: 48, y: 57, w: 8, h: 6 },         // gối trên phản gỗ
-      { src: "assets/decor/den-dau.png", x: 56, y: 70, w: 5, h: 6 },     // đèn dầu cạnh mâm
-      { src: "assets/decor/chum-ngo.png", x: 30, y: 42, w: 8, h: 10 },   // chùm ngô treo tường trái
-      { src: "assets/decor/thung-ro.png", x: 78, y: 72, w: 8, h: 8 },    // thúng rổ cạnh khung cửi
-      { src: "assets/decor/chum-ruou.png", x: 38, y: 66, w: 6, h: 8 },   // chum rượu ngô
+      { src: "assets/decor/goi.png", x: 48, y: 57, w: 8 },
+      { src: "assets/decor/den-dau.png", x: 56, y: 70, w: 5 },
+      { src: "assets/decor/chum-ngo.png", x: 30, y: 42, w: 8 },
+      { src: "assets/decor/thung-ro.png", x: 78, y: 72, w: 8 },
+      { src: "assets/decor/chum-ruou.png", x: 38, y: 66, w: 6 },
     ];
 
     // ===== STATE =====
     let discoveredCount = 0;
     const discovered = new Set();
     let panelOpen = false;
-    let soundOn = false;
+    let dragTarget = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+    let selectedEl = null;
+    let isDragging = false;
 
     // ===== INIT =====
     window.addEventListener("DOMContentLoaded", () => {
-      initIntro();
       initDecor();
       initArtifacts();
       initPanelClose();
-      initSoundToggle();
+      initEditor();
     });
-
-    // ===== INTRO =====
-    function initIntro() {
-      const overlay = document.getElementById("intro-overlay");
-      document.getElementById("start-btn").addEventListener("click", () => {
-        gsap.to(overlay, {
-          opacity: 0, duration: 0.5, ease: "power2.in",
-          onComplete: () => { overlay.style.display = "none"; }
-        });
-      });
-    }
 
     // ===== DECOR =====
     function initDecor() {
       const scene = document.getElementById("scene");
-      DECOR.forEach(d => {
+      DECOR.forEach((d, i) => {
         const el = document.createElement("div");
         el.className = "decor";
-        el.style.cssText = `left:${d.x}%;top:${d.y}%;width:${d.w}%;height:auto;`;
+        el.dataset.decorIdx = i;
+        el.style.cssText = `left:${d.x}%;top:${d.y}%;width:${d.w}%;`;
         el.innerHTML = `<img src="${d.src}" alt="decor" style="width:100%;height:auto;" />`;
         scene.appendChild(el);
       });
@@ -649,48 +540,44 @@
           <span class="artifact-label">${artifact.name}</span>
         `;
 
-        // Hover — chibi bounce
+        // Hover — chibi bounce (only when not dragging)
         el.addEventListener("mouseenter", () => {
-          if (panelOpen) return;
-          gsap.to(el, {
-            y: -6, scale: 1.08, duration: 0.3, ease: "back.out(2)"
-          });
+          if (panelOpen || isDragging) return;
+          gsap.to(el, { y: -4, scale: 1.05, duration: 0.25, ease: "back.out(2)" });
         });
         el.addEventListener("mouseleave", () => {
-          gsap.to(el, {
-            y: 0, scale: 1, duration: 0.3, ease: "power2.out"
-          });
+          if (isDragging) return;
+          gsap.to(el, { y: 0, scale: 1, duration: 0.25, ease: "power2.out" });
         });
 
-        // Click
-        el.addEventListener("click", (e) => {
+        // Double-click → show info panel
+        el.addEventListener("dblclick", (e) => {
           e.stopPropagation();
-          onArtifactClick(artifact, el);
+          e.preventDefault();
+          onArtifactDblClick(artifact, el);
         });
+
         scene.appendChild(el);
       });
     }
 
-    // ===== ARTIFACT CLICK =====
-    function onArtifactClick(artifact, el) {
+    // ===== DOUBLE-CLICK → INFO =====
+    function onArtifactDblClick(artifact, el) {
       if (panelOpen) return;
 
-      // Mark discovered
       if (!discovered.has(artifact.id)) {
         discovered.add(artifact.id);
         discoveredCount++;
         document.getElementById("found-count").textContent = discoveredCount;
         el.classList.add("discovered");
-        if (discoveredCount === 9) {
-          setTimeout(showCompletion, 1500);
-        }
+        if (discoveredCount === 9) setTimeout(showCompletion, 1500);
       }
 
-      // Phase 1: bounce
+      // Bounce
       gsap.timeline()
-        .to(el, { scale: 1.2, duration: 0.1, ease: "power2.out" })
-        .to(el, { scale: 0.9, duration: 0.1 })
-        .to(el, { scale: 1.0, y: 0, duration: 0.15 });
+        .to(el, { scale: 1.15, duration: 0.1, ease: "power2.out" })
+        .to(el, { scale: 0.92, duration: 0.1 })
+        .to(el, { scale: 1.0, y: 0, duration: 0.12 });
 
       // Special effect
       if (artifact.specialEffect) {
@@ -698,7 +585,7 @@
         setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 1000);
       }
 
-      // Dim others + decor
+      // Dim others
       document.querySelectorAll(".artifact").forEach(h => {
         if (h !== el) gsap.to(h, { opacity: 0.25, duration: 0.3 });
       });
@@ -706,13 +593,9 @@
         gsap.to(d, { opacity: 0.25, duration: 0.3 });
       });
       document.getElementById("scene-dim").classList.add("active");
-
-      // Spotlight on clicked artifact
       gsap.to(el, { zIndex: 20, duration: 0 });
 
-      // Sound stub
       if (artifact.sound) console.log("sound:", artifact.sound);
-
       openPanel(artifact);
     }
 
@@ -727,13 +610,13 @@
 
       gsap.fromTo("#info-panel",
         { y: "100%", opacity: 0 },
-        { y: "0%", opacity: 1, duration: 0.35, ease: "power3.out", delay: 0.2 }
+        { y: "0%", opacity: 1, duration: 0.35, ease: "power3.out", delay: 0.15 }
       );
-      const tl = gsap.timeline({ delay: 0.5 });
+      const tl = gsap.timeline({ delay: 0.4 });
       tl.fromTo("#panel-photo", { opacity: 0 }, { opacity: 1, duration: 0.2 })
-        .fromTo("#panel-name", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2 })
-        .fromTo("#panel-name-en", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.15 })
-        .fromTo("#panel-desc", { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 });
+        .fromTo("#panel-name", { x: -15, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2 })
+        .fromTo("#panel-name-en", { x: -15, opacity: 0 }, { x: 0, opacity: 1, duration: 0.15 })
+        .fromTo("#panel-desc", { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 });
     }
 
     function closePanel() {
@@ -764,15 +647,6 @@
       });
     }
 
-    // ===== SOUND TOGGLE =====
-    function initSoundToggle() {
-      const btn = document.getElementById("sound-toggle");
-      btn.addEventListener("click", () => {
-        soundOn = !soundOn;
-        btn.innerHTML = soundOn ? "&#x1f50a; Sound On" : "&#x1f507; Sound Off";
-      });
-    }
-
     // ===== COMPLETION =====
     function showCompletion() {
       const overlay = document.getElementById("completion-overlay");
@@ -780,70 +654,88 @@
       gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
     }
 
-    // ===== EDITOR MODE (press E to toggle) =====
-    let editorMode = false;
-    let dragTarget = null;
-    let dragOffsetX = 0, dragOffsetY = 0;
-    let selectedEl = null; // currently selected for rotate/resize
+    // ===== EDITOR (always active) =====
+    function initEditor() {
+      document.getElementById("editor-export").addEventListener("click", exportPositions);
 
-    document.addEventListener("keydown", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      // Keyboard controls
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        if (!selectedEl) return;
 
-      if (e.key === "e" || e.key === "E") {
-        editorMode = !editorMode;
-        document.getElementById("editor-bar").style.display = editorMode ? "flex" : "none";
-        document.querySelectorAll(".artifact, .decor").forEach(el => {
-          el.style.cursor = editorMode ? "grab" : "";
-          // Show selection outline in editor mode
-          el.style.outline = editorMode ? "1px dashed rgba(200,150,62,0.3)" : "";
-        });
-        if (editorMode) {
-          const intro = document.getElementById("intro-overlay");
-          if (intro) intro.style.display = "none";
-        } else {
-          // Clean up selection
-          if (selectedEl) selectedEl.style.outline = "";
-          selectedEl = null;
+        const rot = parseFloat(selectedEl.dataset.rotate || 0);
+        const scl = parseFloat(selectedEl.dataset.editorScale || 100);
+
+        if (e.key === "r" || e.key === "R") {
+          const delta = e.shiftKey ? -5 : 5;
+          selectedEl.dataset.rotate = rot + delta;
+          applyTransform(selectedEl);
+          updateEditorInfo(selectedEl);
         }
-        return;
-      }
+        if (e.key === "+" || e.key === "=") {
+          selectedEl.dataset.editorScale = scl + 5;
+          applyTransform(selectedEl);
+          updateEditorInfo(selectedEl);
+        }
+        if (e.key === "-" || e.key === "_") {
+          selectedEl.dataset.editorScale = Math.max(10, scl - 5);
+          applyTransform(selectedEl);
+          updateEditorInfo(selectedEl);
+        }
+        if (e.key === "f" || e.key === "F") {
+          selectedEl.dataset.flip = selectedEl.dataset.flip === "1" ? "0" : "1";
+          applyTransform(selectedEl);
+          updateEditorInfo(selectedEl);
+        }
+      });
 
-      // Editor keyboard controls (only when editor mode + item selected)
-      if (!editorMode || !selectedEl) return;
+      // Click to select
+      document.addEventListener("mousedown", (e) => {
+        const el = e.target.closest(".artifact, .decor");
+        if (el) {
+          // Deselect previous
+          if (selectedEl && selectedEl !== el) selectedEl.classList.remove("selected");
+          selectedEl = el;
+          selectedEl.classList.add("selected");
+          updateEditorInfo(el);
 
-      const currentRotate = parseFloat(selectedEl.dataset.rotate || 0);
-      const currentScale = parseFloat(selectedEl.dataset.editorScale || 100);
+          // Start drag
+          if (panelOpen) return;
+          e.preventDefault();
+          dragTarget = el;
+          isDragging = false;
+          const elRect = el.getBoundingClientRect();
+          dragOffsetX = e.clientX - elRect.left;
+          dragOffsetY = e.clientY - elRect.top;
+        } else {
+          // Click empty area → deselect
+          if (selectedEl) {
+            selectedEl.classList.remove("selected");
+            selectedEl = null;
+          }
+        }
+      });
 
-      if (e.key === "r" || e.key === "R") {
-        // R = rotate +15°, Shift+R = rotate -15°
-        const delta = e.shiftKey ? -15 : 15;
-        const newRotate = currentRotate + delta;
-        selectedEl.dataset.rotate = newRotate;
-        applyTransform(selectedEl);
-        updateEditorInfo(selectedEl);
-      }
-      if (e.key === "+" || e.key === "=") {
-        // + = scale up 10%
-        const newScale = currentScale + 10;
-        selectedEl.dataset.editorScale = newScale;
-        applyTransform(selectedEl);
-        updateEditorInfo(selectedEl);
-      }
-      if (e.key === "-" || e.key === "_") {
-        // - = scale down 10%
-        const newScale = Math.max(10, currentScale - 10);
-        selectedEl.dataset.editorScale = newScale;
-        applyTransform(selectedEl);
-        updateEditorInfo(selectedEl);
-      }
-      if (e.key === "f" || e.key === "F") {
-        // F = flip horizontal
-        const flipped = selectedEl.dataset.flip === "1" ? "0" : "1";
-        selectedEl.dataset.flip = flipped;
-        applyTransform(selectedEl);
-        updateEditorInfo(selectedEl);
-      }
-    });
+      document.addEventListener("mousemove", (e) => {
+        if (!dragTarget) return;
+        isDragging = true;
+        e.preventDefault();
+        const scene = document.getElementById("scene");
+        const rect = scene.getBoundingClientRect();
+        const x = ((e.clientX - rect.left - dragOffsetX) / rect.width * 100);
+        const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
+        dragTarget.style.left = x + "%";
+        dragTarget.style.top = y + "%";
+        updateEditorInfo(dragTarget);
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (dragTarget) {
+          dragTarget = null;
+          setTimeout(() => { isDragging = false; }, 50);
+        }
+      });
+    }
 
     function applyTransform(el) {
       const rotate = parseFloat(el.dataset.rotate || 0);
@@ -853,83 +745,20 @@
     }
 
     function updateEditorInfo(el) {
-      const id = el.dataset.id || "decor";
+      const id = el.dataset.id || `decor-${el.dataset.decorIdx || '?'}`;
       const x = parseFloat(el.style.left).toFixed(1);
       const y = parseFloat(el.style.top).toFixed(1);
       const rotate = parseFloat(el.dataset.rotate || 0);
       const scale = parseFloat(el.dataset.editorScale || 100);
-      const flip = el.dataset.flip === "1" ? " flip" : "";
+      const flip = el.dataset.flip === "1" ? " lật" : "";
       document.getElementById("editor-coords").textContent =
-        `${id}: x=${x}, y=${y}, rotate=${rotate}°, scale=${scale}%${flip}`;
+        `${id}: x=${x}, y=${y}, xoay=${rotate}°, size=${scale}%${flip}`;
     }
-
-    // Editor bar UI
-    window.addEventListener("DOMContentLoaded", () => {
-      const bar = document.createElement("div");
-      bar.id = "editor-bar";
-      bar.style.cssText = "display:none;position:fixed;bottom:0;left:0;right:0;background:#222;color:#fff;padding:10px 16px;z-index:300;font-family:monospace;font-size:13px;gap:12px;align-items:center;flex-wrap:wrap;";
-      bar.innerHTML = `
-        <span style="color:#C8963E;font-weight:bold;">EDITOR</span>
-        <span id="editor-coords">Kéo=di chuyển | Click=chọn | R=xoay | +/-=size | F=lật</span>
-        <button id="editor-export" style="margin-left:auto;background:#C8963E;color:#1a0f08;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-family:monospace;">Export tọa độ</button>
-      `;
-      document.body.appendChild(bar);
-      document.getElementById("editor-export").addEventListener("click", exportPositions);
-    });
-
-    // Click to select
-    document.addEventListener("click", (e) => {
-      if (!editorMode) return;
-      const el = e.target.closest(".artifact, .decor");
-      if (el) {
-        // Deselect previous
-        if (selectedEl && selectedEl !== el) {
-          selectedEl.style.outline = "1px dashed rgba(200,150,62,0.3)";
-        }
-        selectedEl = el;
-        selectedEl.style.outline = "2px solid #C8963E";
-        updateEditorInfo(el);
-      }
-    }, true);
-
-    // Drag logic
-    document.addEventListener("mousedown", (e) => {
-      if (!editorMode) return;
-      const el = e.target.closest(".artifact, .decor");
-      if (!el) return;
-      e.preventDefault();
-      dragTarget = el;
-      dragTarget.style.cursor = "grabbing";
-      dragTarget.style.zIndex = 999;
-      const elRect = el.getBoundingClientRect();
-      dragOffsetX = e.clientX - elRect.left;
-      dragOffsetY = e.clientY - elRect.top;
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (!dragTarget) return;
-      e.preventDefault();
-      const scene = document.getElementById("scene");
-      const rect = scene.getBoundingClientRect();
-      const x = ((e.clientX - rect.left - dragOffsetX) / rect.width * 100);
-      const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
-      dragTarget.style.left = x + "%";
-      dragTarget.style.top = y + "%";
-      updateEditorInfo(dragTarget);
-    });
-
-    document.addEventListener("mouseup", () => {
-      if (dragTarget) {
-        dragTarget.style.cursor = "grab";
-        dragTarget.style.zIndex = "";
-        dragTarget = null;
-      }
-    });
 
     function exportPositions() {
       const scene = document.getElementById("scene");
       const rect = scene.getBoundingClientRect();
-      let output = "// === ARTIFACT POSITIONS ===\n";
+      let output = "// === VỊ TRÍ VẬT PHẨM ===\n";
       document.querySelectorAll(".artifact").forEach(el => {
         const id = el.dataset.id;
         const x = parseFloat(el.style.left).toFixed(1);
@@ -944,7 +773,7 @@
         if (flip) line += `, flip: true`;
         output += line + "\n";
       });
-      output += "\n// === DECOR POSITIONS ===\n";
+      output += "\n// === VẬT TRANG TRÍ ===\n";
       document.querySelectorAll(".decor").forEach((el, i) => {
         const x = parseFloat(el.style.left).toFixed(1);
         const y = parseFloat(el.style.top).toFixed(1);
@@ -959,9 +788,9 @@
         output += line + "\n";
       });
       navigator.clipboard.writeText(output).then(() => {
-        alert("Đã copy tọa độ vào clipboard!\n\n" + output);
+        alert("Đã copy tọa độ!\n\n" + output);
       }).catch(() => {
-        prompt("Copy tọa độ bên dưới:", output);
+        prompt("Copy tọa độ:", output);
       });
     }
   </script>
