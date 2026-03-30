@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ngôi Nhà Lô Lô Chải - Sắp Xếp Căn Phòng</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -759,9 +759,22 @@
           if (isDragging) return;
           applyTransform(el);
         });
+        // Double-click / double-tap for info
         el.addEventListener("dblclick", (e) => {
           e.stopPropagation();
           onArtifactDblClick(a, el);
+        });
+        let lastTap = 0;
+        el.addEventListener("touchend", (e) => {
+          if (isDragging) return;
+          const now = Date.now();
+          if (now - lastTap < 350) {
+            e.preventDefault();
+            onArtifactDblClick(a, el);
+            lastTap = 0;
+          } else {
+            lastTap = now;
+          }
         });
         scene.appendChild(el);
       });
@@ -910,8 +923,9 @@
         <div class="tb-sep"></div>
         <button data-action="remove" title="Trả về" style="color:#c55;">&#10005;</button>
       `;
-      // Prevent toolbar clicks from deselecting
+      // Prevent toolbar clicks/touches from deselecting
       tb.addEventListener("mousedown", (e) => e.stopPropagation());
+      tb.addEventListener("touchstart", (e) => e.stopPropagation());
       tb.addEventListener("click", (e) => {
         const btn = e.target.closest("button[data-action]");
         if (btn) onToolbarAction(btn.dataset.action);
@@ -1010,57 +1024,71 @@
       hideToolbar();
     }
 
-    // ===== MOUSE INTERACTIONS =====
+    // ===== POINTER INTERACTIONS (mouse + touch) =====
+    function getPointerXY(e) {
+      if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      if (e.changedTouches && e.changedTouches.length > 0) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    function onPointerDown(e) {
+      if (e.target.closest("#item-toolbar")) return;
+      const pt = getPointerXY(e);
+      const el = e.target.closest(".artifact.placed, .decor.placed");
+      if (el) {
+        selectItem(el);
+        hideToolbar();
+        if (panelOpen) return;
+        e.preventDefault();
+        dragTarget = el;
+        isDragging = false;
+        const elRect = el.getBoundingClientRect();
+        dragOffsetX = pt.x - elRect.left;
+        dragOffsetY = pt.y - elRect.top;
+      } else if (!e.target.closest(".tray-item") && !e.target.closest("#info-panel") && !e.target.closest("#hint-bar") && !e.target.closest("#header-float")) {
+        deselectItem();
+      }
+    }
+
+    function onPointerMove(e) {
+      if (!dragTarget) return;
+      isDragging = true;
+      e.preventDefault();
+      const pt = getPointerXY(e);
+      const scene = document.getElementById("scene");
+      const rect = scene.getBoundingClientRect();
+      const x = ((pt.x - rect.left - dragOffsetX) / rect.width * 100);
+      const y = ((pt.y - rect.top - dragOffsetY) / rect.height * 100);
+      dragTarget.style.left = x + "%";
+      dragTarget.style.top = y + "%";
+    }
+
+    function onPointerUp() {
+      if (dragTarget) {
+        const wasSelected = dragTarget;
+        dragTarget = null;
+        setTimeout(() => {
+          isDragging = false;
+          if (selectedEl && selectedEl === wasSelected) {
+            applyTransform(selectedEl);
+            showToolbar(selectedEl);
+          }
+        }, 50);
+      }
+    }
+
     function initEditor() {
       buildToolbar();
 
-      // Click on placed items → select + start drag
-      document.addEventListener("mousedown", (e) => {
-        // Ignore toolbar clicks
-        if (e.target.closest("#item-toolbar")) return;
+      // Mouse events
+      document.addEventListener("mousedown", onPointerDown);
+      document.addEventListener("mousemove", onPointerMove);
+      document.addEventListener("mouseup", onPointerUp);
 
-        const el = e.target.closest(".artifact.placed, .decor.placed");
-        if (el) {
-          selectItem(el);
-          hideToolbar(); // hide during drag
-          if (panelOpen) return;
-          e.preventDefault();
-          dragTarget = el;
-          isDragging = false;
-          const elRect = el.getBoundingClientRect();
-          dragOffsetX = e.clientX - elRect.left;
-          dragOffsetY = e.clientY - elRect.top;
-        } else if (!e.target.closest(".tray-item") && !e.target.closest("#info-panel") && !e.target.closest("#hint-bar")) {
-          deselectItem();
-        }
-      });
-
-      document.addEventListener("mousemove", (e) => {
-        if (!dragTarget) return;
-        isDragging = true;
-        e.preventDefault();
-        const scene = document.getElementById("scene");
-        const rect = scene.getBoundingClientRect();
-        const x = ((e.clientX - rect.left - dragOffsetX) / rect.width * 100);
-        const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
-        dragTarget.style.left = x + "%";
-        dragTarget.style.top = y + "%";
-      });
-
-      document.addEventListener("mouseup", () => {
-        if (dragTarget) {
-          const wasSelected = dragTarget;
-          dragTarget = null;
-          setTimeout(() => {
-            isDragging = false;
-            // Show toolbar after drag ends
-            if (selectedEl && selectedEl === wasSelected) {
-              applyTransform(selectedEl);
-              showToolbar(selectedEl);
-            }
-          }, 50);
-        }
-      });
+      // Touch events
+      document.addEventListener("touchstart", onPointerDown, { passive: false });
+      document.addEventListener("touchmove", onPointerMove, { passive: false });
+      document.addEventListener("touchend", onPointerUp);
 
       // Escape to close panel
       document.addEventListener("keydown", (e) => {
