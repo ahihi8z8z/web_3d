@@ -316,11 +316,6 @@
     }
     #editor-bar .label { color: var(--gold); font-weight: bold; }
     #editor-bar .hint { opacity: 0.6; }
-    #editor-bar button {
-      background: var(--gold); color: var(--bg); border: none;
-      padding: 3px 10px; border-radius: 3px; cursor: pointer;
-      font-family: monospace; font-size: 11px;
-    }
   </style>
 </head>
 <body>
@@ -352,9 +347,12 @@
   </div>
 
   <div id="editor-bar">
-    <span class="label">SẮP XẾP</span>
-    <span id="editor-coords" class="hint">Kéo vật phẩm từ khung phải vào phòng | Chọn rồi: R xoay, +/- size, F lật | Double-click xem chi tiết</span>
-    <button id="editor-export" style="margin-left:auto;">Export</button>
+    <span class="label">SẮP XẾP CĂN PHÒNG</span>
+    <span class="hint">Kéo vật phẩm từ khung phải vào phòng</span>
+    <span class="hint">|</span>
+    <span class="hint">Chọn rồi: R xoay, +/- kích thước, F lật, Delete trả về</span>
+    <span class="hint">|</span>
+    <span class="hint">Double-click xem chi tiết</span>
   </div>
 
   <div id="info-panel">
@@ -556,7 +554,6 @@
       if (selectedEl) selectedEl.classList.remove("selected");
       selectedEl = sel;
       sel.classList.add("selected");
-      updateEditorInfo(sel);
     }
 
     // ===== DOUBLE-CLICK → INFO =====
@@ -629,7 +626,6 @@
 
     // ===== EDITOR =====
     function initEditor() {
-      document.getElementById("editor-export").addEventListener("click", exportPositions);
 
       document.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
@@ -638,20 +634,16 @@
         const scl = parseFloat(selectedEl.dataset.editorScale || 100);
         if (e.key === "r" || e.key === "R") {
           selectedEl.dataset.rotate = rot + (e.shiftKey ? -5 : 5);
-          applyTransform(selectedEl); updateEditorInfo(selectedEl);
-        }
+          applyTransform(selectedEl);        }
         if (e.key === "+" || e.key === "=") {
           selectedEl.dataset.editorScale = scl + 5;
-          applyTransform(selectedEl); updateEditorInfo(selectedEl);
-        }
+          applyTransform(selectedEl);        }
         if (e.key === "-" || e.key === "_") {
           selectedEl.dataset.editorScale = Math.max(10, scl - 5);
-          applyTransform(selectedEl); updateEditorInfo(selectedEl);
-        }
+          applyTransform(selectedEl);        }
         if (e.key === "f" || e.key === "F") {
           selectedEl.dataset.flip = selectedEl.dataset.flip === "1" ? "0" : "1";
-          applyTransform(selectedEl); updateEditorInfo(selectedEl);
-        }
+          applyTransform(selectedEl);        }
         // Delete: return item to tray
         if (e.key === "Delete" || e.key === "Backspace") {
           const id = selectedEl.dataset.id;
@@ -665,7 +657,6 @@
             const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
             if (trayItem) trayItem.classList.remove("placed");
             selectedEl = null;
-            document.getElementById("editor-coords").textContent = "Đã trả vật phẩm về khung";
           }
         }
       });
@@ -677,8 +668,7 @@
           if (selectedEl && selectedEl !== el) selectedEl.classList.remove("selected");
           selectedEl = el;
           selectedEl.classList.add("selected");
-          updateEditorInfo(el);
-          if (panelOpen) return;
+            if (panelOpen) return;
           e.preventDefault();
           dragTarget = el;
           isDragging = false;
@@ -700,7 +690,6 @@
         const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
         dragTarget.style.left = x + "%";
         dragTarget.style.top = y + "%";
-        updateEditorInfo(dragTarget);
       });
 
       document.addEventListener("mouseup", () => {
@@ -718,46 +707,6 @@
       el.style.transform = `rotate(${r}deg) scale(${s * f}, ${s})`;
     }
 
-    function updateEditorInfo(el) {
-      const id = el.dataset.id || "?";
-      const x = parseFloat(el.style.left).toFixed(1);
-      const y = parseFloat(el.style.top).toFixed(1);
-      const r = parseFloat(el.dataset.rotate || 0);
-      const s = parseFloat(el.dataset.editorScale || 100);
-      const f = el.dataset.flip === "1" ? " lật" : "";
-      document.getElementById("editor-coords").textContent =
-        `${id}: x=${x}, y=${y}, xoay=${r}°, size=${s}%${f} | Delete=trả về`;
-    }
-
-    function exportPositions() {
-      const scene = document.getElementById("scene");
-      const rect = scene.getBoundingClientRect();
-      let output = "// === VỊ TRÍ VẬT PHẨM ===\n";
-      document.querySelectorAll(".artifact.placed").forEach(el => {
-        const id = el.dataset.id;
-        const x = parseFloat(el.style.left).toFixed(1);
-        const y = parseFloat(el.style.top).toFixed(1);
-        const r = parseFloat(el.dataset.rotate || 0);
-        const s = parseFloat(el.dataset.editorScale || 100);
-        const f = el.dataset.flip === "1";
-        let line = `${id}: x:${x}, y:${y}`;
-        if (r) line += `, rotate:${r}`; if (s!==100) line += `, scale:${s}`; if (f) line += `, flip`;
-        output += line + "\n";
-      });
-      output += "\n// === TRANG TRÍ ===\n";
-      document.querySelectorAll(".decor.placed").forEach(el => {
-        const id = el.dataset.id;
-        const x = parseFloat(el.style.left).toFixed(1);
-        const y = parseFloat(el.style.top).toFixed(1);
-        const r = parseFloat(el.dataset.rotate || 0);
-        const s = parseFloat(el.dataset.editorScale || 100);
-        const f = el.dataset.flip === "1";
-        let line = `${id}: x:${x}, y:${y}`;
-        if (r) line += `, rotate:${r}`; if (s!==100) line += `, scale:${s}`; if (f) line += `, flip`;
-        output += line + "\n";
-      });
-      navigator.clipboard.writeText(output).then(() => alert("Đã copy!\n\n" + output)).catch(() => prompt("Copy:", output));
-    }
   </script>
 </body>
 </html>
