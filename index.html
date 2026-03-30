@@ -307,15 +307,55 @@
     #completion-overlay h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 12px; }
     #completion-overlay p { color: var(--surface); font-size: 0.9rem; opacity: 0.8; max-width: 480px; line-height: 1.6; }
 
-    /* ===== EDITOR BAR ===== */
-    #editor-bar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 6px 14px; background: #222; color: #fff;
-      font-family: monospace; font-size: 11px;
-      flex-shrink: 0; flex-wrap: wrap; z-index: 300;
+    /* ===== FLOATING TOOLBAR ===== */
+    #item-toolbar {
+      position: absolute;
+      display: none;
+      z-index: 50;
+      background: rgba(26,15,8,0.92);
+      border: 1px solid var(--gold);
+      border-radius: 22px;
+      padding: 3px 6px;
+      gap: 2px;
+      align-items: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      pointer-events: auto;
     }
-    #editor-bar .label { color: var(--gold); font-weight: bold; }
-    #editor-bar .hint { opacity: 0.6; }
+    #item-toolbar.visible { display: flex; }
+    #item-toolbar button {
+      width: 30px; height: 30px;
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+    #item-toolbar button:hover {
+      background: rgba(200,150,62,0.2);
+    }
+    #item-toolbar button:active {
+      background: rgba(200,150,62,0.35);
+    }
+    #item-toolbar .tb-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(200,150,62,0.2);
+      margin: 0 2px;
+    }
+
+    /* ===== BOTTOM HINT BAR ===== */
+    #hint-bar {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 6px 14px; background: #222; color: #fff;
+      font-family: 'Lora', serif; font-size: 11px;
+      flex-shrink: 0; z-index: 300; opacity: 0.5;
+    }
   </style>
 </head>
 <body>
@@ -346,13 +386,8 @@
     </div>
   </div>
 
-  <div id="editor-bar">
-    <span class="label">SẮP XẾP CĂN PHÒNG</span>
-    <span class="hint">Kéo vật phẩm từ khung phải vào phòng</span>
-    <span class="hint">|</span>
-    <span class="hint">Chọn rồi: R xoay, +/- kích thước, F lật, Delete trả về</span>
-    <span class="hint">|</span>
-    <span class="hint">Double-click xem chi tiết</span>
+  <div id="hint-bar">
+    Kéo vật phẩm từ khung phải vào phòng &nbsp;·&nbsp; Bấm vào vật phẩm để chỉnh sửa
   </div>
 
   <div id="info-panel">
@@ -551,9 +586,8 @@
       dragOffsetY = elRect.height / 2;
 
       // Select it
-      if (selectedEl) selectedEl.classList.remove("selected");
-      selectedEl = sel;
-      sel.classList.add("selected");
+      selectItem(sel);
+      hideToolbar(); // hide during initial drag
     }
 
     // ===== DOUBLE-CLICK → INFO =====
@@ -585,6 +619,7 @@
 
     function openPanel(artifact) {
       panelOpen = true;
+      hideToolbar();
       document.getElementById("panel-photo").src = artifact.photo;
       document.getElementById("panel-name").textContent = artifact.name;
       document.getElementById("panel-name-en").textContent = artifact.nameEn;
@@ -624,59 +659,145 @@
       gsap.fromTo(o, { opacity:0 }, { opacity:1, duration:0.5 });
     }
 
-    // ===== EDITOR =====
-    function initEditor() {
-
-      document.addEventListener("keydown", (e) => {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-        if (!selectedEl) return;
-        const rot = parseFloat(selectedEl.dataset.rotate || 0);
-        const scl = parseFloat(selectedEl.dataset.editorScale || 100);
-        if (e.key === "r" || e.key === "R") {
-          selectedEl.dataset.rotate = rot + (e.shiftKey ? -5 : 5);
-          applyTransform(selectedEl);        }
-        if (e.key === "+" || e.key === "=") {
-          selectedEl.dataset.editorScale = scl + 5;
-          applyTransform(selectedEl);        }
-        if (e.key === "-" || e.key === "_") {
-          selectedEl.dataset.editorScale = Math.max(10, scl - 5);
-          applyTransform(selectedEl);        }
-        if (e.key === "f" || e.key === "F") {
-          selectedEl.dataset.flip = selectedEl.dataset.flip === "1" ? "0" : "1";
-          applyTransform(selectedEl);        }
-        // Delete: return item to tray
-        if (e.key === "Delete" || e.key === "Backspace") {
-          const id = selectedEl.dataset.id;
-          if (id && placedItems.has(id)) {
-            selectedEl.classList.remove("placed", "selected");
-            selectedEl.dataset.rotate = 0;
-            selectedEl.dataset.editorScale = 100;
-            selectedEl.dataset.flip = "0";
-            selectedEl.style.transform = "";
-            placedItems.delete(id);
-            const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
-            if (trayItem) trayItem.classList.remove("placed");
-            selectedEl = null;
-          }
-        }
+    // ===== FLOATING TOOLBAR =====
+    function buildToolbar() {
+      const scene = document.getElementById("scene");
+      const tb = document.createElement("div");
+      tb.id = "item-toolbar";
+      tb.innerHTML = `
+        <button data-action="rotate-ccw" title="Xoay trái">&#8634;</button>
+        <button data-action="rotate-cw" title="Xoay phải">&#8635;</button>
+        <div class="tb-sep"></div>
+        <button data-action="size-up" title="Phóng to">+</button>
+        <button data-action="size-down" title="Thu nhỏ">&minus;</button>
+        <div class="tb-sep"></div>
+        <button data-action="flip" title="Lật ngang">&#8596;</button>
+        <button data-action="info" title="Xem chi tiết">&#9432;</button>
+        <div class="tb-sep"></div>
+        <button data-action="remove" title="Trả về" style="color:#c55;">&#10005;</button>
+      `;
+      // Prevent toolbar clicks from deselecting
+      tb.addEventListener("mousedown", (e) => e.stopPropagation());
+      tb.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (btn) onToolbarAction(btn.dataset.action);
       });
+      scene.appendChild(tb);
+    }
 
-      // Click on scene items to select + start drag
+    function onToolbarAction(action) {
+      if (!selectedEl) return;
+      const rot = parseFloat(selectedEl.dataset.rotate || 0);
+      const scl = parseFloat(selectedEl.dataset.editorScale || 100);
+      switch(action) {
+        case 'rotate-cw':
+          selectedEl.dataset.rotate = rot + 15;
+          applyTransform(selectedEl); break;
+        case 'rotate-ccw':
+          selectedEl.dataset.rotate = rot - 15;
+          applyTransform(selectedEl); break;
+        case 'size-up':
+          selectedEl.dataset.editorScale = scl + 10;
+          applyTransform(selectedEl); break;
+        case 'size-down':
+          selectedEl.dataset.editorScale = Math.max(10, scl - 10);
+          applyTransform(selectedEl); break;
+        case 'flip':
+          selectedEl.dataset.flip = selectedEl.dataset.flip === "1" ? "0" : "1";
+          applyTransform(selectedEl); break;
+        case 'info':
+          if (selectedEl.classList.contains("artifact")) {
+            const a = ARTIFACTS.find(a => a.id === selectedEl.dataset.id);
+            if (a) onArtifactDblClick(a, selectedEl);
+          }
+          break;
+        case 'remove':
+          returnToTray(selectedEl);
+          break;
+      }
+      // Reposition toolbar after transform
+      if (selectedEl && action !== 'remove' && action !== 'info') positionToolbar(selectedEl);
+    }
+
+    function returnToTray(el) {
+      const id = el.dataset.id;
+      if (!id || !placedItems.has(id)) return;
+      el.classList.remove("placed", "selected");
+      el.dataset.rotate = 0;
+      el.dataset.editorScale = 100;
+      el.dataset.flip = "0";
+      el.style.transform = "";
+      placedItems.delete(id);
+      const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
+      if (trayItem) trayItem.classList.remove("placed");
+      selectedEl = null;
+      hideToolbar();
+    }
+
+    function showToolbar(el) {
+      const tb = document.getElementById("item-toolbar");
+      // Hide info button for decor items
+      const infoBtn = tb.querySelector('[data-action="info"]');
+      if (infoBtn) infoBtn.style.display = el.classList.contains("artifact") ? "" : "none";
+      tb.classList.add("visible");
+      positionToolbar(el);
+    }
+
+    function positionToolbar(el) {
+      const tb = document.getElementById("item-toolbar");
+      const scene = document.getElementById("scene");
+      const sceneRect = scene.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      // Position centered above element
+      const centerX = ((elRect.left + elRect.width / 2 - sceneRect.left) / sceneRect.width * 100);
+      const topY = ((elRect.top - sceneRect.top - 40) / sceneRect.height * 100);
+      // If too close to top, show below instead
+      const bottomY = ((elRect.bottom - sceneRect.top + 8) / sceneRect.height * 100);
+      const useTop = topY > 2;
+      tb.style.left = centerX + "%";
+      tb.style.top = (useTop ? topY : bottomY) + "%";
+      tb.style.transform = "translateX(-50%)";
+    }
+
+    function hideToolbar() {
+      document.getElementById("item-toolbar").classList.remove("visible");
+    }
+
+    function selectItem(el) {
+      if (selectedEl && selectedEl !== el) selectedEl.classList.remove("selected");
+      selectedEl = el;
+      el.classList.add("selected");
+      showToolbar(el);
+    }
+
+    function deselectItem() {
+      if (selectedEl) selectedEl.classList.remove("selected");
+      selectedEl = null;
+      hideToolbar();
+    }
+
+    // ===== MOUSE INTERACTIONS =====
+    function initEditor() {
+      buildToolbar();
+
+      // Click on placed items → select + start drag
       document.addEventListener("mousedown", (e) => {
+        // Ignore toolbar clicks
+        if (e.target.closest("#item-toolbar")) return;
+
         const el = e.target.closest(".artifact.placed, .decor.placed");
         if (el) {
-          if (selectedEl && selectedEl !== el) selectedEl.classList.remove("selected");
-          selectedEl = el;
-          selectedEl.classList.add("selected");
-            if (panelOpen) return;
+          selectItem(el);
+          hideToolbar(); // hide during drag
+          if (panelOpen) return;
           e.preventDefault();
           dragTarget = el;
           isDragging = false;
           const elRect = el.getBoundingClientRect();
           dragOffsetX = e.clientX - elRect.left;
           dragOffsetY = e.clientY - elRect.top;
-        } else if (!e.target.closest(".tray-item") && !e.target.closest("#info-panel") && !e.target.closest("#editor-bar")) {
-          if (selectedEl) { selectedEl.classList.remove("selected"); selectedEl = null; }
+        } else if (!e.target.closest(".tray-item") && !e.target.closest("#info-panel") && !e.target.closest("#hint-bar")) {
+          deselectItem();
         }
       });
 
@@ -694,9 +815,19 @@
 
       document.addEventListener("mouseup", () => {
         if (dragTarget) {
+          const wasSelected = dragTarget;
           dragTarget = null;
-          setTimeout(() => { isDragging = false; }, 50);
+          setTimeout(() => {
+            isDragging = false;
+            // Show toolbar after drag ends
+            if (selectedEl && selectedEl === wasSelected) showToolbar(selectedEl);
+          }, 50);
         }
+      });
+
+      // Escape to close panel
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && panelOpen) closePanel();
       });
     }
 
