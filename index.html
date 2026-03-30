@@ -153,7 +153,9 @@
       position: relative;
       width: 100%;
       height: 100%;
-      overflow: visible;
+      overflow: hidden;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
     }
     #room-bg {
       width: 100%;
@@ -694,6 +696,7 @@
       initEditor();
       initSound();
       initCaptureShare();
+      initSceneZoom();
     });
 
     // ===== BUILD TRAY =====
@@ -1064,6 +1067,29 @@
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && panelOpen) closePanel();
       });
+    }
+
+    // ===== SCENE ZOOM (scroll wheel) =====
+    let sceneZoom = 1;
+    const ZOOM_MIN = 1;
+    const ZOOM_MAX = 3;
+    const ZOOM_STEP = 0.1;
+
+    function initSceneZoom() {
+      const scene = document.getElementById("scene");
+      scene.addEventListener("wheel", (e) => {
+        // Only zoom if not over a placed item (let items handle their own scroll if needed)
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+        sceneZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, sceneZoom + delta));
+
+        // Zoom toward mouse position
+        const rect = scene.getBoundingClientRect();
+        const mx = ((e.clientX - rect.left) / rect.width) * 100;
+        const my = ((e.clientY - rect.top) / rect.height) * 100;
+        scene.style.transformOrigin = `${mx}% ${my}%`;
+        scene.style.transform = `scale(${sceneZoom})`;
+      }, { passive: false });
     }
 
     function applyTransform(el) {
