@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ngoi Nha Lo Lo Chai - Interactive Room</title>
+  <title>Ngôi Nhà Lô Lô Chải - Interactive Room</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
@@ -413,26 +413,26 @@
 
   <!-- INTRO OVERLAY -->
   <div id="intro-overlay">
-    <h2>Ngoi Nha Lo Lo Chai</h2>
+    <h2>Ngôi Nhà Lô Lô Chải</h2>
     <p class="intro-quote">
-      "Buoc vao ngoi nha da cua nguoi Lo Lo Chai — noi ngon lua bep khong bao gio tat,
-      tieng khung cui van vang, va moi tam vai theu om tron ban sac tram nam.
-      Chin vat pham, chin manh hon dan toc dang cho ban kham pha."
+      "Bước vào ngôi nhà đá của người Lô Lô Chải — nơi ngọn lửa bếp không bao giờ tắt,
+      tiếng khung cửi vẫn vang, và mỗi tấm vải thêu ôm trọn bản sắc trăm năm.
+      Chín vật phẩm, chín mảnh hồn dân tộc đang chờ bạn khám phá."
     </p>
     <p>
-      Chao mung ban den voi ngoi nha cua nguoi Lo Lo Chai — noi dia dau cuc Bac To quoc,
-      duoi chan cot co Lung Cu, Ha Giang. Cung kham pha nhung cau chuyen van hoa
-      duoc ke qua vat pham truyen thong cua con nguoi noi day.
+      Chào mừng bạn đến với ngôi nhà của người Lô Lô Chải — nơi địa đầu cực Bắc Tổ quốc,
+      dưới chân cột cờ Lũng Cú, Hà Giang. Cùng khám phá những câu chuyện văn hoá
+      được kể qua vật phẩm truyền thống của con người nơi đây.
     </p>
-    <button id="start-btn">Kham Pha Ngoi Nha</button>
+    <button id="start-btn">Khám Phá Ngôi Nhà</button>
   </div>
 
   <!-- HEADER -->
   <header id="site-header">
-    <h1>Ngoi Nha Lo Lo Chai</h1>
+    <h1>Ngôi Nhà Lô Lô Chải</h1>
     <div id="counter">
       <span id="found-count">0</span>
-      <span> / 9 vat pham</span>
+      <span> / 9 vật phẩm</span>
     </div>
     <button id="sound-toggle">&#x1f50a; Sound</button>
   </header>
@@ -463,11 +463,11 @@
 
   <!-- COMPLETION OVERLAY -->
   <div id="completion-overlay">
-    <h2>Ban da kham pha tat ca 9 vat pham!</h2>
+    <h2>Bạn đã khám phá tất cả 9 vật phẩm!</h2>
     <p>
-      Moi vat pham la mot manh ghep cua van hoa Lo Lo Chai —
-      tu ngon lua bep am cung den tieng trong dong vang vong.
-      Cam on ban da dong hanh tren hanh trinh nay.
+      Mỗi vật phẩm là một mảnh ghép của văn hóa Lô Lô Chải —
+      từ ngọn lửa bếp ấm cúng đến tiếng trống đồng vang vọng.
+      Cảm ơn bạn đã đồng hành trên hành trình này.
     </p>
   </div>
 
@@ -480,9 +480,9 @@
     const ARTIFACTS = [
       {
         id: "bep-lua",
-        name: "Bep Lua",
+        name: "Bếp Lửa",
         nameEn: "Sacred Fireplace",
-        description: "Bep lua la trung tam cua khong gian sinh hoat trong ngoi nha truyen thong, noi gan voi viec nau an, suoi am va quay quan gia dinh. Ngon lua chua bao gio tat. Day la chi tiet quan trong giup toan bo goc nha co hon va co hoi tho doi song.",
+        description: "Bếp lửa là trung tâm của không gian sinh hoạt trong ngôi nhà truyền thống, nơi gắn với việc nấu ăn, sưởi ấm và quây quần gia đình. Ngọn lửa chưa bao giờ tắt. Đây là chi tiết quan trọng giúp toàn bộ góc nhà có hồn và có hơi thở đời sống.",
         photo: "assets/artifacts/01-bep-lua.png",
         sprite: "assets/artifacts/01-bep-lua-3d.png",
         // "góc dưới bên trái sàn nhà"
@@ -492,9 +492,9 @@
       },
       {
         id: "noi-dong",
-        name: "Noi Dong",
+        name: "Nồi Đồng",
         nameEn: "Bronze Pot",
-        description: "Noi dong la vat dung quen thuoc trong gian bep truyen thong, goi cam giac doi song gia dinh moc mac va gian di. Khi dat tren bep lua, noi dong giup canh vat tro nen sinh dong va tu nhien hon.",
+        description: "Nồi đồng là vật dụng quen thuộc trong gian bếp truyền thống, gợi cảm giác đời sống gia đình mộc mạc và giản dị. Khi đặt trên bếp lửa, nồi đồng giúp cảnh vật trở nên sinh động và tự nhiên hơn.",
         photo: "assets/artifacts/02-noi-dong.png",
         sprite: "assets/artifacts/02-noi-dong-3d.png",
         // "ngay trên bếp lửa, góc dưới bên trái"
@@ -504,9 +504,9 @@
       },
       {
         id: "gui-tre",
-        name: "Gui Tre",
+        name: "Gùi Tre",
         nameEn: "Bamboo Basket",
-        description: "Gui tre la vat dung quen thuoc trong doi song cua nguoi dan vung cao, thuong dung de mang do, dung nong san hoac vat dung hang ngay. Dua gui vao mo hinh se giup goc nha them tu nhien va giau ban sac dia phuong.",
+        description: "Gùi tre là vật dụng quen thuộc trong đời sống của người dân vùng cao, thường dùng để mang đồ, đựng nông sản hoặc vật dụng hằng ngày. Đưa gùi vào mô hình sẽ giúp góc nhà thêm tự nhiên và giàu bản sắc địa phương.",
         photo: "assets/artifacts/03-gui-tre.png",
         sprite: "assets/artifacts/03-gui-tre-3d.png",
         // "cạnh bên phải bếp lửa, lệch sang phải một chút"
@@ -516,9 +516,9 @@
       },
       {
         id: "trong-dong",
-        name: "Trong Dong",
+        name: "Trống Đồng",
         nameEn: "Bronze Drum",
-        description: "Trong dong la bieu tuong van hoa dac trung, gan voi doi song tinh than va ban sac cua cong dong Lo Lo. Tieng trong vang len moi dip le hoi. Du duoc cach dieu theo phong cach chibi, vat pham nay van can giu net trang trong va noi bat.",
+        description: "Trống đồng là biểu tượng văn hóa đặc trưng, gắn với đời sống tinh thần và bản sắc của cộng đồng Lô Lô. Tiếng trống vang lên mỗi dịp lễ hội. Dù được cách điệu theo phong cách chibi, vật phẩm này vẫn cần giữ nét trang trọng và nổi bật.",
         photo: "assets/artifacts/04-trong-dong.png",
         sprite: "assets/artifacts/04-trong-dong-3d.png",
         // "gần cụm bếp, phía ngoài chếch về bên trái"
@@ -528,9 +528,9 @@
       },
       {
         id: "vay-ao",
-        name: "Vay Ao Lo Lo",
+        name: "Váy Áo Lô Lô",
         nameEn: "Traditional Costume",
-        description: "Vay ao Lo Lo la trang phuc truyen thong dac trung nhat cua phu nu dan toc Lo Lo Chai, duoc may thu cong tu vai tho cam voi hoa van theu tay tinh xao, mau sac ruc ro mang dam ban sac van hoa mien nui.",
+        description: "Váy áo Lô Lô là trang phục truyền thống đặc trưng nhất của phụ nữ dân tộc Lô Lô Chải, được may thủ công từ vải thổ cẩm với những họa văn thêu tay tinh xảo, màu sắc rực rỡ mang đậm bản sắc văn hóa miền núi.",
         photo: "assets/artifacts/05-vay-ao.png",
         sprite: "assets/artifacts/05-vay-ao-3d.png",
         // "treo trên móc gỗ ngay trên tường phải"
@@ -540,9 +540,9 @@
       },
       {
         id: "khung-cui",
-        name: "Khung Cui",
+        name: "Khung Cửi",
         nameEn: "Weaving Loom",
-        description: "Khung cui det vai la dung cu truyen thong quan trong nhat trong van hoa nguoi Lo Lo Chai. Moi tam vai det ra deu gan lien voi trang phuc va le hoi. Khung cui mang den hoi tho hoai co, am ap cua cuoc song mien nui.",
+        description: "Khung cửi dệt vải là dụng cụ truyền thống quan trọng nhất trong văn hóa người Lô Lô Chải, giúp các phụ nữ dân tộc dệt nên những tấm vải thổ cẩm với hoa văn độc đáo, rực rỡ. Không chỉ là công cụ lao động hàng ngày, khung cửi còn thể hiện sự khéo léo, cần cù và bản sắc văn hóa của cộng đồng.",
         photo: "assets/artifacts/06-khung-cui.png",
         sprite: "assets/artifacts/06-khung-cui-3d.png",
         // "góc dưới phải, kế tường phải"
@@ -552,9 +552,9 @@
       },
       {
         id: "mu-trang-suc",
-        name: "Mu & Trang Suc",
+        name: "Mũ & Trang Sức",
         nameEn: "Hat & Silver Jewelry",
-        description: "Mu truyen thong va trang suc bac la 'bau vat' khong the thieu cua phu nu Lo Lo — vong co to ban, khuyen tai dai, lac tay che tac thu cong tinh xao. Khi dat tren ke trong ngoi nha Lo Lo, bo trang suc bac toat len ve dep hoai co, lap lanh.",
+        description: "Mũ truyền thống là chi tiết nổi bật nhất trong trang phục phụ nữ Lô Lô Chải, được làm từ nhiều lớp vải thổ cẩm với màu sắc rực rỡ, hàng cúc kim loại và vô số tua rua, pom-pom xinh xắn. Trang sức bạc là \"báu vật\" không thể thiếu — vòng cổ to bản, khuyên tai dài, lắc tay chế tác thủ công tinh xảo từ bạc nguyên chất.",
         photo: "assets/artifacts/07-mu.png",
         sprite: "assets/artifacts/07-mu-3d.png",
         // "trên tường phải, trên kệ gỗ"
@@ -564,9 +564,9 @@
       },
       {
         id: "phan-go",
-        name: "Phan Go",
+        name: "Phản Gỗ",
         nameEn: "Wooden Platform Bed",
-        description: "Phan go thap la noi ngoi nghi va sum vay gian di nhung tran day hoi am cua gia dinh nguoi Lo Lo Chai sau ngay lam nuong ray. Chiec phan go thap sat san giup giu am vao mua dong gia ret vung cao.",
+        description: "Phản gỗ thấp là nơi ngồi nghỉ và sum vầy giản dị nhưng tràn đầy hơi ấm của gia đình người Lô Lô Chải sau ngày làm nương rẫy. Chiếc phản gỗ thấp sát sàn giúp giữ ấm vào mùa đông giá rét vùng cao, đồng thời thể hiện lối sống gần gũi với đất trời và truyền thống dân tộc.",
         photo: "assets/artifacts/08-phan-go.jpg",
         sprite: "assets/artifacts/08-phan-go-3d.png",
         // "khu trung tâm sàn, hơi lùi về phía trong"
@@ -576,9 +576,9 @@
       },
       {
         id: "mam-go",
-        name: "Mam Go",
+        name: "Mâm Gỗ",
         nameEn: "Wooden Tray",
-        description: "Mam go la vat dung quen thuoc trong bua an gia dinh nguoi Lo Lo Chai, noi moi nguoi quay quan ben mam com dan da. No tuong trung cho su doan ket, chia se va hieu khach cua cong dong.",
+        description: "Mâm gỗ là vật dụng quen thuộc trong bữa ăn gia đình người Lô Lô Chải, nơi mọi người quây quần bên mâm cơm dân dã. Nó tượng trưng cho sự đoàn kết, chia sẻ và hiếu khách của cộng đồng. Chiếc mâm gỗ mộc mạc góp phần tạo nên không khí ấm cúng, gần gũi của ngôi nhà truyền thống vùng cao.",
         photo: "assets/artifacts/09-mam-go.jpg",
         sprite: "assets/artifacts/09-mam-go-3d.png",
         // "trước phản gỗ, khu trung tâm"
