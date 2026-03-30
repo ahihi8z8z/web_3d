@@ -784,22 +784,84 @@
     let editorMode = false;
     let dragTarget = null;
     let dragOffsetX = 0, dragOffsetY = 0;
+    let selectedEl = null; // currently selected for rotate/resize
 
     document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
       if (e.key === "e" || e.key === "E") {
-        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         editorMode = !editorMode;
         document.getElementById("editor-bar").style.display = editorMode ? "flex" : "none";
         document.querySelectorAll(".artifact, .decor").forEach(el => {
           el.style.cursor = editorMode ? "grab" : "";
+          // Show selection outline in editor mode
+          el.style.outline = editorMode ? "1px dashed rgba(200,150,62,0.3)" : "";
         });
-        // Hide intro if editor mode
         if (editorMode) {
           const intro = document.getElementById("intro-overlay");
           if (intro) intro.style.display = "none";
+        } else {
+          // Clean up selection
+          if (selectedEl) selectedEl.style.outline = "";
+          selectedEl = null;
         }
+        return;
+      }
+
+      // Editor keyboard controls (only when editor mode + item selected)
+      if (!editorMode || !selectedEl) return;
+
+      const currentRotate = parseFloat(selectedEl.dataset.rotate || 0);
+      const currentScale = parseFloat(selectedEl.dataset.editorScale || 100);
+
+      if (e.key === "r" || e.key === "R") {
+        // R = rotate +15°, Shift+R = rotate -15°
+        const delta = e.shiftKey ? -15 : 15;
+        const newRotate = currentRotate + delta;
+        selectedEl.dataset.rotate = newRotate;
+        applyTransform(selectedEl);
+        updateEditorInfo(selectedEl);
+      }
+      if (e.key === "+" || e.key === "=") {
+        // + = scale up 10%
+        const newScale = currentScale + 10;
+        selectedEl.dataset.editorScale = newScale;
+        applyTransform(selectedEl);
+        updateEditorInfo(selectedEl);
+      }
+      if (e.key === "-" || e.key === "_") {
+        // - = scale down 10%
+        const newScale = Math.max(10, currentScale - 10);
+        selectedEl.dataset.editorScale = newScale;
+        applyTransform(selectedEl);
+        updateEditorInfo(selectedEl);
+      }
+      if (e.key === "f" || e.key === "F") {
+        // F = flip horizontal
+        const flipped = selectedEl.dataset.flip === "1" ? "0" : "1";
+        selectedEl.dataset.flip = flipped;
+        applyTransform(selectedEl);
+        updateEditorInfo(selectedEl);
       }
     });
+
+    function applyTransform(el) {
+      const rotate = parseFloat(el.dataset.rotate || 0);
+      const scale = parseFloat(el.dataset.editorScale || 100) / 100;
+      const flip = el.dataset.flip === "1" ? -1 : 1;
+      el.style.transform = `rotate(${rotate}deg) scale(${scale * flip}, ${scale})`;
+    }
+
+    function updateEditorInfo(el) {
+      const id = el.dataset.id || "decor";
+      const x = parseFloat(el.style.left).toFixed(1);
+      const y = parseFloat(el.style.top).toFixed(1);
+      const rotate = parseFloat(el.dataset.rotate || 0);
+      const scale = parseFloat(el.dataset.editorScale || 100);
+      const flip = el.dataset.flip === "1" ? " flip" : "";
+      document.getElementById("editor-coords").textContent =
+        `${id}: x=${x}, y=${y}, rotate=${rotate}°, scale=${scale}%${flip}`;
+    }
 
     // Editor bar UI
     window.addEventListener("DOMContentLoaded", () => {
@@ -807,14 +869,28 @@
       bar.id = "editor-bar";
       bar.style.cssText = "display:none;position:fixed;bottom:0;left:0;right:0;background:#222;color:#fff;padding:10px 16px;z-index:300;font-family:monospace;font-size:13px;gap:12px;align-items:center;flex-wrap:wrap;";
       bar.innerHTML = `
-        <span style="color:#C8963E;font-weight:bold;">EDITOR MODE</span>
-        <span id="editor-coords">Kéo vật phẩm để chỉnh vị trí</span>
+        <span style="color:#C8963E;font-weight:bold;">EDITOR</span>
+        <span id="editor-coords">Kéo=di chuyển | Click=chọn | R=xoay | +/-=size | F=lật</span>
         <button id="editor-export" style="margin-left:auto;background:#C8963E;color:#1a0f08;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-family:monospace;">Export tọa độ</button>
       `;
       document.body.appendChild(bar);
-
       document.getElementById("editor-export").addEventListener("click", exportPositions);
     });
+
+    // Click to select
+    document.addEventListener("click", (e) => {
+      if (!editorMode) return;
+      const el = e.target.closest(".artifact, .decor");
+      if (el) {
+        // Deselect previous
+        if (selectedEl && selectedEl !== el) {
+          selectedEl.style.outline = "1px dashed rgba(200,150,62,0.3)";
+        }
+        selectedEl = el;
+        selectedEl.style.outline = "2px solid #C8963E";
+        updateEditorInfo(el);
+      }
+    }, true);
 
     // Drag logic
     document.addEventListener("mousedown", (e) => {
@@ -825,8 +901,6 @@
       dragTarget = el;
       dragTarget.style.cursor = "grabbing";
       dragTarget.style.zIndex = 999;
-      const scene = document.getElementById("scene");
-      const rect = scene.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
       dragOffsetX = e.clientX - elRect.left;
       dragOffsetY = e.clientY - elRect.top;
@@ -841,9 +915,7 @@
       const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
       dragTarget.style.left = x + "%";
       dragTarget.style.top = y + "%";
-      const id = dragTarget.dataset.id || "decor";
-      document.getElementById("editor-coords").textContent =
-        `${id}: x=${x.toFixed(1)}, y=${y.toFixed(1)}`;
+      updateEditorInfo(dragTarget);
     });
 
     document.addEventListener("mouseup", () => {
@@ -860,23 +932,35 @@
       let output = "// === ARTIFACT POSITIONS ===\n";
       document.querySelectorAll(".artifact").forEach(el => {
         const id = el.dataset.id;
-        const x = parseFloat(el.style.left);
-        const y = parseFloat(el.style.top);
-        const w = (el.getBoundingClientRect().width / rect.width * 100);
-        output += `${id}: x: ${x.toFixed(1)}, y: ${y.toFixed(1)}, w: ${w.toFixed(1)}\n`;
+        const x = parseFloat(el.style.left).toFixed(1);
+        const y = parseFloat(el.style.top).toFixed(1);
+        const w = (el.getBoundingClientRect().width / rect.width * 100).toFixed(1);
+        const rotate = parseFloat(el.dataset.rotate || 0);
+        const scale = parseFloat(el.dataset.editorScale || 100);
+        const flip = el.dataset.flip === "1";
+        let line = `${id}: x: ${x}, y: ${y}, w: ${w}`;
+        if (rotate !== 0) line += `, rotate: ${rotate}`;
+        if (scale !== 100) line += `, scale: ${scale}`;
+        if (flip) line += `, flip: true`;
+        output += line + "\n";
       });
       output += "\n// === DECOR POSITIONS ===\n";
       document.querySelectorAll(".decor").forEach((el, i) => {
-        const x = parseFloat(el.style.left);
-        const y = parseFloat(el.style.top);
-        const w = (el.getBoundingClientRect().width / rect.width * 100);
-        output += `decor-${i}: x: ${x.toFixed(1)}, y: ${y.toFixed(1)}, w: ${w.toFixed(1)}\n`;
+        const x = parseFloat(el.style.left).toFixed(1);
+        const y = parseFloat(el.style.top).toFixed(1);
+        const w = (el.getBoundingClientRect().width / rect.width * 100).toFixed(1);
+        const rotate = parseFloat(el.dataset.rotate || 0);
+        const scale = parseFloat(el.dataset.editorScale || 100);
+        const flip = el.dataset.flip === "1";
+        let line = `decor-${i}: x: ${x}, y: ${y}, w: ${w}`;
+        if (rotate !== 0) line += `, rotate: ${rotate}`;
+        if (scale !== 100) line += `, scale: ${scale}`;
+        if (flip) line += `, flip: true`;
+        output += line + "\n";
       });
-      // Copy to clipboard
       navigator.clipboard.writeText(output).then(() => {
         alert("Đã copy tọa độ vào clipboard!\n\n" + output);
       }).catch(() => {
-        // Fallback
         prompt("Copy tọa độ bên dưới:", output);
       });
     }
