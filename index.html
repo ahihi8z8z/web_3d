@@ -92,7 +92,7 @@
 
     /* ===== ITEM TRAY (right sidebar) ===== */
     #item-tray {
-      width: 180px;
+      width: 200px;
       flex-shrink: 0;
       background: rgba(26,15,8,0.6);
       border-left: 1px solid rgba(200,150,62,0.2);
@@ -101,7 +101,7 @@
       overflow: hidden;
     }
     #tray-header {
-      padding: 10px 12px;
+      padding: 8px 10px;
       font-family: 'Playfair Display', serif;
       font-size: 0.8rem;
       color: var(--gold);
@@ -113,46 +113,62 @@
       flex: 1;
       overflow-y: auto;
       padding: 8px;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
+      align-content: start;
     }
     #tray-items::-webkit-scrollbar { width: 4px; }
     #tray-items::-webkit-scrollbar-thumb { background: rgba(200,150,62,0.3); border-radius: 2px; }
 
     .tray-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
+      gap: 4px;
+      padding: 6px 4px;
       background: rgba(200,150,62,0.08);
       border: 1px solid rgba(200,150,62,0.15);
       border-radius: 8px;
-      cursor: grab;
+      cursor: pointer;
       transition: all 0.2s;
-      flex-shrink: 0;
     }
     .tray-item:hover {
-      background: rgba(200,150,62,0.15);
-      border-color: rgba(200,150,62,0.3);
+      background: rgba(200,150,62,0.18);
+      border-color: var(--gold);
+      transform: scale(1.05);
     }
     .tray-item.placed {
-      opacity: 0.35;
+      opacity: 0.3;
       pointer-events: none;
     }
     .tray-item img {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
       filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3));
       pointer-events: none;
     }
     .tray-item-name {
       font-family: 'Playfair Display', serif;
-      font-size: 0.65rem;
+      font-size: 0.55rem;
       color: var(--gold);
-      line-height: 1.3;
+      line-height: 1.2;
+      text-align: center;
       pointer-events: none;
+    }
+    .tray-sep {
+      grid-column: 1 / -1;
+      border-top: 1px solid rgba(200,150,62,0.15);
+      margin: 2px 0;
+    }
+    .tray-label {
+      grid-column: 1 / -1;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.65rem;
+      color: rgba(200,150,62,0.5);
+      text-align: center;
+      padding: 2px 0;
     }
 
     /* ===== ARTIFACT on scene ===== */
@@ -314,20 +330,20 @@
       z-index: 50;
       background: rgba(26,15,8,0.92);
       border: 1px solid var(--gold);
-      border-radius: 22px;
-      padding: 3px 6px;
-      gap: 2px;
+      border-radius: 24px;
+      padding: 4px 8px;
+      gap: 3px;
       align-items: center;
       box-shadow: 0 4px 16px rgba(0,0,0,0.5);
       pointer-events: auto;
     }
     #item-toolbar.visible { display: flex; }
     #item-toolbar button {
-      width: 30px; height: 30px;
+      width: 36px; height: 36px;
       background: none;
       border: none;
       color: var(--gold);
-      font-size: 15px;
+      font-size: 18px;
       cursor: pointer;
       border-radius: 50%;
       display: flex;
@@ -387,7 +403,7 @@
   </div>
 
   <div id="hint-bar">
-    Kéo vật phẩm từ khung phải vào phòng &nbsp;·&nbsp; Bấm vào vật phẩm để chỉnh sửa
+    Chọn vật phẩm bên phải để đặt vào phòng &nbsp;·&nbsp; Bấm vào vật phẩm trong phòng để chỉnh sửa
   </div>
 
   <div id="info-panel">
@@ -455,7 +471,7 @@
       { id:"chum-ruou", name:"Chum Rượu", src:"assets/decor/chum-ruou.png" },
     ];
 
-    const ITEM_SIZE = 10; // uniform width % when placed on scene
+    const ITEM_SIZE = 14; // uniform width % when placed on scene
 
     // ===== STATE =====
     let discoveredCount = 0;
@@ -480,36 +496,32 @@
     function buildTray() {
       const tray = document.getElementById("tray-items");
 
-      // Artifacts
       ARTIFACTS.forEach(a => {
         const item = document.createElement("div");
         item.className = "tray-item";
         item.dataset.type = "artifact";
         item.dataset.id = a.id;
         item.innerHTML = `<img src="${a.sprite}" alt="${a.name}" /><span class="tray-item-name">${a.name}</span>`;
-        item.addEventListener("mousedown", (e) => startTrayDrag(e, a.id, "artifact"));
+        item.addEventListener("click", () => placeItemCenter(a.id, "artifact"));
         tray.appendChild(item);
       });
 
-      // Separator
       const sep = document.createElement("div");
-      sep.style.cssText = "border-top:1px solid rgba(200,150,62,0.15);margin:6px 0;flex-shrink:0;";
+      sep.className = "tray-sep";
       tray.appendChild(sep);
 
-      // Decor label
       const label = document.createElement("div");
-      label.style.cssText = "font-family:'Playfair Display',serif;font-size:0.7rem;color:rgba(200,150,62,0.5);text-align:center;padding:2px 0;flex-shrink:0;";
+      label.className = "tray-label";
       label.textContent = "Trang Trí";
       tray.appendChild(label);
 
-      // Decor items
       DECOR.forEach(d => {
         const item = document.createElement("div");
         item.className = "tray-item";
         item.dataset.type = "decor";
         item.dataset.id = d.id;
         item.innerHTML = `<img src="${d.src}" alt="${d.name}" /><span class="tray-item-name">${d.name}</span>`;
-        item.addEventListener("mousedown", (e) => startTrayDrag(e, d.id, "decor"));
+        item.addEventListener("click", () => placeItemCenter(d.id, "decor"));
         tray.appendChild(item);
       });
     }
@@ -553,41 +565,30 @@
       });
     }
 
-    // ===== TRAY DRAG → PLACE ON SCENE =====
-    function startTrayDrag(e, id, type) {
+    // ===== CLICK TRAY → PLACE AT CENTER =====
+    function placeItemCenter(id, type) {
       if (placedItems.has(id)) return;
-      e.preventDefault();
 
       const scene = document.getElementById("scene");
-      const sceneRect = scene.getBoundingClientRect();
       const sel = type === "artifact"
         ? scene.querySelector(`.artifact[data-id="${id}"]`)
         : scene.querySelector(`.decor[data-id="${id}"]`);
 
-      // Show element and start dragging it
       sel.classList.add("placed");
       placedItems.add(id);
 
-      // Mark tray item as placed
       const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
       if (trayItem) trayItem.classList.add("placed");
 
-      // Position at mouse
-      const x = ((e.clientX - sceneRect.left) / sceneRect.width * 100);
-      const y = ((e.clientY - sceneRect.top) / sceneRect.height * 100);
-      sel.style.left = x + "%";
-      sel.style.top = y + "%";
+      // Place at center of room floor area (~50%, ~65%)
+      sel.style.left = "45%";
+      sel.style.top = "60%";
 
-      // Start drag immediately
-      dragTarget = sel;
-      isDragging = true;
-      const elRect = sel.getBoundingClientRect();
-      dragOffsetX = elRect.width / 2;
-      dragOffsetY = elRect.height / 2;
+      // Animate appearing
+      gsap.fromTo(sel, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" });
 
-      // Select it
+      // Select it and show toolbar
       selectItem(sel);
-      hideToolbar(); // hide during initial drag
     }
 
     // ===== DOUBLE-CLICK → INFO =====
