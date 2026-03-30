@@ -46,7 +46,26 @@
       color: var(--surface);
       opacity: 0.85;
     }
-    #found-count { font-weight: 700; color: var(--gold); }
+    #header-actions { display: flex; gap: 6px; }
+    #header-actions button {
+      background: rgba(200,150,62,0.12);
+      border: 1px solid rgba(200,150,62,0.25);
+      color: var(--gold);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    #header-actions button:hover {
+      background: rgba(200,150,62,0.25);
+      border-color: var(--gold);
+    }
+    #header-actions button.active {
+      background: rgba(200,150,62,0.3);
+      border-color: var(--gold);
+    }
 
     /* ===== MAIN LAYOUT ===== */
     #main-area {
@@ -412,9 +431,10 @@
 
   <header id="site-header">
     <h1>Ngôi Nhà Lô Lô Chải</h1>
-    <div id="counter">
-      <span id="found-count">0</span>
-      <span> / 13 vật phẩm</span>
+    <div id="header-actions">
+      <button id="sound-toggle" title="Bật/tắt nhạc nền">&#x1f50a;</button>
+      <button id="capture-btn" title="Chụp ảnh căn phòng">&#x1f4f7;</button>
+      <button id="share-btn" title="Chia sẻ">&#x1f517;</button>
     </div>
   </header>
 
@@ -459,31 +479,31 @@
       { id:"bep-lua", name:"Bếp Lửa", nameEn:"Sacred Fireplace",
         description:"Bếp lửa là trung tâm của không gian sinh hoạt trong ngôi nhà truyền thống, nơi gắn với việc nấu ăn, sưởi ấm và quây quần gia đình. Ngọn lửa chưa bao giờ tắt. Đây là chi tiết quan trọng giúp toàn bộ góc nhà có hồn và có hơi thở đời sống.",
         photo:"assets/artifacts/01-bep-lua-real.png", sprite:"assets/artifacts/01-bep-lua-3d.png",
-        sound:"fire", specialEffect:"flame-burst" },
+        sound:"assets/sounds/bep-lua.mp3", specialEffect:"flame-burst" },
       { id:"noi-dong", name:"Nồi Đồng", nameEn:"Bronze Pot",
         description:"Nồi đồng là vật dụng quen thuộc trong gian bếp truyền thống, gợi cảm giác đời sống gia đình mộc mạc và giản dị. Khi đặt trên bếp lửa, nồi đồng giúp cảnh vật trở nên sinh động và tự nhiên hơn.",
         photo:"assets/artifacts/02-noi-dong-real.png", sprite:"assets/artifacts/02-noi-dong-3d.png",
-        sound:null, specialEffect:"smoke-puff" },
+        sound:"assets/sounds/noi-dong.mp3", specialEffect:"smoke-puff" },
       { id:"gui-tre", name:"Gùi Tre", nameEn:"Bamboo Basket",
         description:"Gùi tre là vật dụng quen thuộc trong đời sống của người dân vùng cao, thường dùng để mang đồ, đựng nông sản hoặc vật dụng hằng ngày. Đưa gùi vào mô hình sẽ giúp góc nhà thêm tự nhiên và giàu bản sắc địa phương.",
         photo:"assets/artifacts/03-gui-tre-real.png", sprite:"assets/artifacts/03-gui-tre-3d.png",
-        sound:null, specialEffect:"sway" },
+        sound:"assets/sounds/gui-tre.mp3", specialEffect:"sway" },
       { id:"trong-dong", name:"Trống Đồng", nameEn:"Bronze Drum",
         description:"Trống đồng là biểu tượng văn hóa đặc trưng, gắn với đời sống tinh thần và bản sắc của cộng đồng Lô Lô. Tiếng trống vang lên mỗi dịp lễ hội. Dù được cách điệu theo phong cách chibi, vật phẩm này vẫn cần giữ nét trang trọng và nổi bật.",
         photo:"assets/artifacts/04-trong-dong-real.png", sprite:"assets/artifacts/04-trong-dong-3d.png",
-        sound:"drum", specialEffect:"ripple" },
+        sound:"assets/sounds/trong-dong.mp3", specialEffect:"ripple" },
       { id:"vay-ao", name:"Váy Áo Lô Lô", nameEn:"Traditional Costume",
         description:"Váy áo Lô Lô là trang phục truyền thống đặc trưng nhất của phụ nữ dân tộc Lô Lô Chải, được may thủ công từ vải thổ cẩm với những họa văn thêu tay tinh xảo, màu sắc rực rỡ mang đậm bản sắc văn hóa miền núi.",
         photo:"assets/artifacts/05-vay-ao-real.png", sprite:"assets/artifacts/05-vay-ao-3d.png",
-        sound:null, specialEffect:"pattern-glow" },
+        sound:"assets/sounds/vay-ao.mp3", specialEffect:"pattern-glow" },
       { id:"khung-cui", name:"Khung Cửi", nameEn:"Weaving Loom",
         description:"Khung cửi dệt vải là dụng cụ truyền thống quan trọng nhất trong văn hóa người Lô Lô Chải, giúp các phụ nữ dân tộc dệt nên những tấm vải thổ cẩm với hoa văn độc đáo, rực rỡ. Không chỉ là công cụ lao động hàng ngày, khung cửi còn thể hiện sự khéo léo, cần cù và bản sắc văn hóa của cộng đồng.",
         photo:"assets/artifacts/06-khung-cui-real.png", sprite:"assets/artifacts/06-khung-cui-3d.png",
-        sound:null, specialEffect:"thread-weave" },
+        sound:"assets/sounds/khung-cui.mp3", specialEffect:"thread-weave" },
       { id:"mu-trang-suc", name:"Mũ & Trang Sức", nameEn:"Hat & Silver Jewelry",
         description:"Mũ truyền thống là chi tiết nổi bật nhất trong trang phục phụ nữ Lô Lô Chải, được làm từ nhiều lớp vải thổ cẩm với màu sắc rực rỡ, hàng cúc kim loại và vô số tua rua, pom-pom xinh xắn. Trang sức bạc là \"báu vật\" không thể thiếu — vòng cổ to bản, khuyên tai dài, lắc tay chế tác thủ công tinh xảo từ bạc nguyên chất.",
         photo:"assets/artifacts/07-mu-real.png", sprite:"assets/artifacts/07-mu-3d.png",
-        sound:null, specialEffect:"sparkle" },
+        sound:"assets/sounds/mu-trang-suc.mp3", specialEffect:"sparkle" },
       { id:"phan-go", name:"Phản Gỗ", nameEn:"Wooden Platform Bed",
         description:"Phản gỗ thấp là nơi ngồi nghỉ và sum vầy giản dị nhưng tràn đầy hơi ấm của gia đình người Lô Lô Chải sau ngày làm nương rẫy. Chiếc phản gỗ thấp sát sàn giúp giữ ấm vào mùa đông giá rét vùng cao, đồng thời thể hiện lối sống gần gũi với đất trời và truyền thống dân tộc.",
         photo:"assets/artifacts/08-phan-go-real.jpg", sprite:"assets/artifacts/08-phan-go-3d.png",
@@ -495,15 +515,15 @@
       { id:"banh-tam-giac-mach", name:"Bánh Tam Giác Mạch", nameEn:"Buckwheat Cake",
         description:"Bánh tam giác mạch là món ăn đặc trưng của vùng cao nguyên đá Hà Giang, được làm từ hoa tam giác mạch — loài hoa tím hồng nở rộ mỗi độ thu về. Bánh có vị bùi nhẹ, thơm mộc mạc, thường được nướng trên bếp than hồng. Đây không chỉ là món ăn mà còn là biểu tượng văn hóa ẩm thực của người Lô Lô Chải.",
         photo:"assets/artifacts/10-banh-tam-giac-mach-real.png", sprite:"assets/artifacts/10-banh-tam-giac-mach-3d.png",
-        sound:null, specialEffect:null },
+        sound:"assets/sounds/banh-tam-giac-mach.mp3", specialEffect:null },
       { id:"chum-ruou-ngo", name:"Chum Rượu Ngô", nameEn:"Corn Wine Jar",
         description:"Chum rượu ngô men lá là thức uống truyền thống không thể thiếu trong đời sống người Lô Lô Chải. Rượu được nấu từ ngô nương, ủ với men lá rừng trong những chiếc chum sành, tạo nên vị ngọt dịu, thơm nồng đặc trưng. Mỗi chum rượu là sự kết tinh của thiên nhiên và bàn tay khéo léo.",
         photo:"assets/artifacts/11-chum-ruou-real.jpg", sprite:"assets/artifacts/11-chum-ruou-3d.png",
-        sound:null, specialEffect:null },
+        sound:"assets/sounds/chum-ruou-ngo.mp3", specialEffect:null },
       { id:"men-men", name:"Mèn Mén", nameEn:"Steamed Corn Cake",
         description:"Mèn mén là món ăn chính hàng ngày của người Lô Lô Chải, được làm từ bột ngô xay nhuyễn, đồ hai lần cho chín đều. Món ăn giản dị nhưng chứa đựng cả một nền văn hóa ẩm thực vùng cao — nơi ngô là cây lương thực chủ đạo, nuôi sống bao thế hệ trên cao nguyên đá.",
         photo:"assets/artifacts/12-men-men-real.jpg", sprite:"assets/artifacts/12-men-men-3d.png",
-        sound:null, specialEffect:null }
+        sound:"assets/sounds/men-men.mp3", specialEffect:null }
     ];
 
     // Structural elements - clickable on room but NOT draggable
@@ -511,17 +531,17 @@
       { id:"mai-nha", name:"Mái Nhà", nameEn:"Roof",
         description:"Mái nhà người Lô Lô lợp bằng ngói máng âm dương — những viên ngói đất nung xếp úp-ngửa xen kẽ nhau, tạo thành lớp mái cong mượt mà màu xanh xám. Bên dưới mái lộ rõ hệ xà gỗ Sa mộc nâu sẫm đỡ mái — những thanh gỗ tròn thô ráp giao nhau ở góc nhà.",
         photo:"assets/artifacts/struct-mai-nha-real.jpg",
-        // Click zone: top area of room (roof)
+        sound:"assets/sounds/mai-nha.mp3",
         x: 10, y: 2, w: 82, h: 22 },
       { id:"tuong-nha", name:"Tường Nhà", nameEn:"Wall",
         description:"Tường nhà được làm theo kỹ thuật \"trình tường\" — đất thịt được đầm chặt từng lớp vào khuôn gỗ. Những bức tường này đã đứng vững vàng hàng trăm năm trên Cao nguyên đá Đồng Văn. Màu vàng nâu đất ấm áp bao phủ toàn bộ, phần trên tường có hệ xà gỗ chia ô tạo khung trang trí tự nhiên.",
         photo:"assets/artifacts/struct-tuong-nha-real.jpg",
-        // Click zone: walls area
+        sound:"assets/sounds/tuong-nha.mp3",
         x: 5, y: 22, w: 90, h: 35 },
       { id:"hang-rao-da", name:"Hàng Rào Đá", nameEn:"Stone Fence",
         description:"Những phiến đá tai mèo từ núi, xếp chồng lên nhau theo kinh nghiệm cha truyền con nối. Hàng rào đá không chỉ để phân ranh giới hay ngăn gia súc — theo người Lô Lô, nó còn là tấm khiên che chở gia đình khỏi gió núi và thú dữ.",
         photo:"assets/artifacts/struct-hang-rao-real.jpg",
-        // Click zone: stone base perimeter
+        sound:"assets/sounds/hang-rao-da.mp3",
         x: 3, y: 82, w: 94, h: 16 }
     ];
 
@@ -542,8 +562,116 @@
     let dragOffsetX = 0, dragOffsetY = 0;
     let selectedEl = null;
     let isDragging = false;
-    // Track which items are placed on scene
     const placedItems = new Set();
+
+    // ===== SOUND SYSTEM =====
+    let mainSound = null;
+    let itemSound = null;
+    let soundEnabled = false;
+
+    function initSound() {
+      mainSound = new Audio("assets/sounds/main.mp3");
+      mainSound.loop = true;
+      mainSound.volume = 0.3;
+
+      document.getElementById("sound-toggle").addEventListener("click", () => {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById("sound-toggle");
+        if (soundEnabled) {
+          mainSound.play().catch(() => {});
+          btn.textContent = "\u{1F50A}";
+          btn.classList.add("active");
+        } else {
+          mainSound.pause();
+          if (itemSound) { itemSound.pause(); itemSound = null; }
+          btn.textContent = "\u{1F507}";
+          btn.classList.remove("active");
+        }
+      });
+    }
+
+    function playItemSound(src) {
+      if (!soundEnabled || !src) return;
+      if (itemSound) { itemSound.pause(); itemSound.currentTime = 0; }
+      itemSound = new Audio(src);
+      itemSound.volume = 0.6;
+      itemSound.play().catch(() => {});
+    }
+
+    function stopItemSound() {
+      if (itemSound) { itemSound.pause(); itemSound = null; }
+    }
+
+    // ===== CAPTURE & SHARE =====
+    function initCaptureShare() {
+      document.getElementById("capture-btn").addEventListener("click", captureRoom);
+      document.getElementById("share-btn").addEventListener("click", shareRoom);
+    }
+
+    function captureRoom() {
+      const scene = document.getElementById("scene");
+      // Use html2canvas if available, otherwise simple canvas approach
+      const canvas = document.createElement("canvas");
+      const rect = scene.getBoundingClientRect();
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+      // Draw background
+      const bg = document.getElementById("room-bg");
+      ctx.drawImage(bg, 0, 0, rect.width, rect.height);
+      // Draw placed artifacts
+      const items = scene.querySelectorAll(".artifact.placed, .decor.placed");
+      let loaded = 0;
+      const total = items.length;
+      if (total === 0) { downloadCanvas(canvas); return; }
+      items.forEach(el => {
+        const img = el.querySelector("img");
+        const elRect = el.getBoundingClientRect();
+        const x = elRect.left - rect.left;
+        const y = elRect.top - rect.top;
+        const w = elRect.width;
+        const h = elRect.height;
+        const tempImg = new Image();
+        tempImg.crossOrigin = "anonymous";
+        tempImg.onload = () => {
+          ctx.save();
+          const cx = x + w/2, cy = y + h/2;
+          const rot = parseFloat(el.dataset.rotate || 0) * Math.PI / 180;
+          const s = parseFloat(el.dataset.editorScale || 100) / 100;
+          const f = el.dataset.flip === "1" ? -1 : 1;
+          ctx.translate(cx, cy);
+          ctx.rotate(rot);
+          ctx.scale(s * f, s);
+          ctx.drawImage(tempImg, -w/2/s, -h/2/s, w/s, h/s);
+          ctx.restore();
+          loaded++;
+          if (loaded >= total) downloadCanvas(canvas);
+        };
+        tempImg.onerror = () => { loaded++; if (loaded >= total) downloadCanvas(canvas); };
+        tempImg.src = img.src;
+      });
+    }
+
+    function downloadCanvas(canvas) {
+      const link = document.createElement("a");
+      link.download = "ngoi-nha-lo-lo-chai.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function shareRoom() {
+      const text = "Ngôi Nhà Lô Lô Chải — Tôi vừa sắp xếp căn phòng truyền thống của người Lô Lô Chải!";
+      if (navigator.share) {
+        navigator.share({ title: "Ngôi Nhà Lô Lô Chải", text: text, url: window.location.href }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(text + "\n" + window.location.href).then(() => {
+          alert("Đã copy link chia sẻ!");
+        }).catch(() => {
+          prompt("Copy link bên dưới:", window.location.href);
+        });
+      }
+    }
 
     // ===== INIT =====
     window.addEventListener("DOMContentLoaded", () => {
@@ -551,6 +679,8 @@
       buildSceneElements();
       initPanelClose();
       initEditor();
+      initSound();
+      initCaptureShare();
     });
 
     // ===== BUILD TRAY =====
@@ -720,9 +850,10 @@
       document.getElementById("panel-name").textContent = artifact.name;
       document.getElementById("panel-name-en").textContent = artifact.nameEn;
       document.getElementById("panel-desc").textContent = artifact.description;
+      // Play item sound
+      playItemSound(artifact.sound);
       // Slide open left panel
       document.getElementById("info-panel").classList.add("open");
-      // Fade in content
       const inner = document.getElementById("info-panel-inner");
       gsap.fromTo(inner, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, delay: 0.15 });
     }
@@ -730,6 +861,7 @@
     function closePanel() {
       document.getElementById("info-panel").classList.remove("open");
       panelOpen = false;
+      stopItemSound();
       document.querySelectorAll(".artifact.placed").forEach(h => gsap.to(h, { opacity:1, zIndex:10, duration:0.3 }));
       document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity:1, duration:0.3 }));
       document.getElementById("scene-dim").classList.remove("active");
