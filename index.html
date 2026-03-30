@@ -22,24 +22,34 @@
       font-family: 'Lora', serif;
       color: var(--earth);
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
 
     /* ===== HEADER ===== */
     #site-header {
+      display: none;
+      flex-shrink: 0;
+      z-index: 50;
+    }
+    /* Header content floats over scene area */
+    #header-float {
+      position: fixed;
+      top: 0;
+      right: 260px; /* tray width */
+      left: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 8px 20px;
-      background: linear-gradient(180deg, rgba(26,15,8,0.95), rgba(26,15,8,0.8));
-      flex-shrink: 0;
-      z-index: 50;
+      background: linear-gradient(180deg, rgba(26,15,8,0.85), transparent);
+      z-index: 40;
+      pointer-events: none;
     }
-    #site-header h1 {
+    #header-float > * { pointer-events: auto; }
+    #header-float h1 {
       font-family: 'Playfair Display', serif;
       font-size: 1.1rem;
       color: var(--gold);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.5);
     }
     #counter {
       font-size: 0.85rem;
@@ -69,10 +79,9 @@
 
     /* ===== MAIN LAYOUT ===== */
     #main-area {
-      flex: 1;
       display: flex;
+      height: 100vh;
       overflow: hidden;
-      min-height: 0;
     }
 
     /* ===== INFO PANEL (left sidebar) ===== */
@@ -130,28 +139,26 @@
       color: #4a3020; line-height: 1.6; margin: 0;
     }
 
-    /* ===== SCENE (center-right, hugs tray) ===== */
+    /* ===== SCENE (fills remaining space) ===== */
     #scene-wrapper {
       flex: 1;
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       align-items: center;
       overflow: hidden;
-      padding: 8px;
+      padding: 4px;
       min-width: 0;
     }
     #scene {
       position: relative;
+      width: 100%;
       height: 100%;
-      max-height: calc(100vh - 80px);
-      aspect-ratio: 1 / 1;
       overflow: visible;
-      border-radius: 8px;
     }
     #room-bg {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       display: block;
     }
     #scene-dim {
@@ -420,23 +427,29 @@
 
     /* ===== BOTTOM HINT BAR ===== */
     #hint-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 260px; /* tray width */
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      padding: 6px 14px; background: #222; color: #fff;
+      padding: 6px 14px; background: rgba(26,15,8,0.7); color: #fff;
       font-family: 'Lora', serif; font-size: 11px;
-      flex-shrink: 0; z-index: 300; opacity: 0.5;
+      z-index: 40; opacity: 0.6;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
     }
   </style>
 </head>
 <body>
 
-  <header id="site-header">
+  <div id="header-float">
     <h1>Ngôi Nhà Lô Lô Chải</h1>
     <div id="header-actions">
-      <button id="sound-toggle" title="Bật/tắt nhạc nền">&#x1f50a;</button>
+      <button id="sound-toggle" title="Bật/tắt nhạc nền">&#x1f507;</button>
       <button id="capture-btn" title="Chụp ảnh căn phòng">&#x1f4f7;</button>
       <button id="share-btn" title="Chia sẻ">&#x1f517;</button>
     </div>
-  </header>
+  </div>
 
   <div id="main-area">
     <!-- INFO PANEL (left sidebar, hidden by default) -->
