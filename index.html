@@ -56,11 +56,66 @@
       min-height: 0;
     }
 
-    /* ===== SCENE (left) ===== */
+    /* ===== INFO PANEL (left sidebar) ===== */
+    #info-panel {
+      width: 0;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1.5px solid var(--gold);
+      overflow: hidden;
+      transition: width 0.35s ease;
+      z-index: 30;
+      position: relative;
+    }
+    #info-panel.open {
+      width: 320px;
+    }
+    #info-panel-inner {
+      width: 320px;
+      height: 100%;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    #panel-close {
+      align-self: flex-end;
+      background: none; border: none;
+      font-size: 1.3rem; color: var(--earth);
+      cursor: pointer; opacity: 0.5;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    #panel-close:hover { opacity: 1; background: rgba(107,58,31,0.1); }
+    #panel-photo-wrap {
+      width: 100%; max-height: 200px;
+      border-radius: 10px; border: 2px solid var(--gold);
+      overflow: hidden; background: #e8dcc8;
+      flex-shrink: 0;
+    }
+    #panel-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #panel-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; color: var(--earth); margin: 0;
+    }
+    #panel-name-en {
+      font-family: 'Lora', serif; font-size: 0.7rem;
+      color: var(--gold); margin: 0;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    #panel-desc {
+      font-family: 'Lora', serif; font-size: 0.85rem;
+      color: #4a3020; line-height: 1.6; margin: 0;
+    }
+
+    /* ===== SCENE (center-right, hugs tray) ===== */
     #scene-wrapper {
       flex: 1;
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
       overflow: hidden;
       padding: 8px;
@@ -290,38 +345,7 @@
     .artifact.fx-thread-weave { animation: thread-weave-anim 0.6s ease-in-out; }
     @keyframes thread-weave-anim { 0%{transform:rotate(0)} 25%{transform:rotate(-2deg)} 75%{transform:rotate(2deg)} 100%{transform:rotate(0)} }
 
-    /* ===== INFO PANEL ===== */
-    #info-panel {
-      position: fixed; bottom: 0; left: 50%;
-      transform: translateX(-50%) translateY(100%);
-      width: min(600px, 90vw);
-      background: var(--surface);
-      border: 1.5px solid var(--gold);
-      border-bottom: none;
-      border-radius: 20px 20px 0 0;
-      padding: 20px 24px;
-      box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
-      z-index: 100; opacity: 0;
-    }
-    #panel-content { display: flex; gap: 16px; align-items: flex-start; }
-    #panel-photo-wrap {
-      flex-shrink: 0; width: 100px; height: 100px;
-      border-radius: 10px; border: 2px solid var(--gold);
-      overflow: hidden; background: #e8dcc8;
-    }
-    #panel-photo { width: 100%; height: 100%; object-fit: cover; }
-    #panel-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--earth); margin: 0 0 3px; }
-    #panel-name-en { font-family: 'Lora', serif; font-size: 0.7rem; color: var(--gold); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
-    #panel-desc { font-family: 'Lora', serif; font-size: 0.85rem; color: #4a3020; line-height: 1.55; margin: 0; }
-    #panel-close {
-      position: absolute; top: 10px; right: 14px;
-      background: none; border: none; font-size: 1.2rem;
-      color: var(--earth); cursor: pointer; opacity: 0.6;
-      width: 26px; height: 26px; display: flex;
-      align-items: center; justify-content: center;
-      border-radius: 50%; transition: all 0.2s;
-    }
-    #panel-close:hover { opacity: 1; background: rgba(107,58,31,0.1); }
+    /* (info panel CSS is above in layout section) */
 
     /* ===== COMPLETION ===== */
     #completion-overlay {
@@ -395,10 +419,21 @@
   </header>
 
   <div id="main-area">
-    <!-- SCENE (left) -->
+    <!-- INFO PANEL (left sidebar, hidden by default) -->
+    <div id="info-panel">
+      <div id="info-panel-inner">
+        <button id="panel-close">&times;</button>
+        <div id="panel-photo-wrap"><img id="panel-photo" src="" alt="" /></div>
+        <h2 id="panel-name"></h2>
+        <p id="panel-name-en"></p>
+        <p id="panel-desc"></p>
+      </div>
+    </div>
+
+    <!-- SCENE (center-right) -->
     <div id="scene-wrapper">
       <div id="scene">
-        <img id="room-bg" src="assets/scene/room-bg.png?v=2" alt="Lo Lo Chai Room" />
+        <img id="room-bg" src="assets/scene/room-bg.png?v=3" alt="Lo Lo Chai Room" />
         <div id="scene-dim"></div>
       </div>
     </div>
@@ -406,26 +441,12 @@
     <!-- ITEM TRAY (right) -->
     <div id="item-tray">
       <div id="tray-header">Vật Phẩm</div>
-      <div id="tray-items">
-        <!-- filled by JS -->
-      </div>
+      <div id="tray-items"></div>
     </div>
   </div>
 
   <div id="hint-bar">
     Chọn vật phẩm bên phải để đặt vào phòng &nbsp;·&nbsp; Bấm vào vật phẩm trong phòng để chỉnh sửa
-  </div>
-
-  <div id="info-panel">
-    <button id="panel-close">&times;</button>
-    <div id="panel-content">
-      <div id="panel-photo-wrap"><img id="panel-photo" src="" alt="" /></div>
-      <div id="panel-text">
-        <h2 id="panel-name"></h2>
-        <p id="panel-name-en"></p>
-        <p id="panel-desc"></p>
-      </div>
-    </div>
   </div>
 
   <div id="completion-overlay">
@@ -699,32 +720,23 @@
       document.getElementById("panel-name").textContent = artifact.name;
       document.getElementById("panel-name-en").textContent = artifact.nameEn;
       document.getElementById("panel-desc").textContent = artifact.description;
-      gsap.fromTo("#info-panel", { y:"100%", opacity:0 }, { y:"0%", opacity:1, duration:0.3, ease:"power3.out", delay:0.1 });
-      const tl = gsap.timeline({ delay: 0.35 });
-      tl.fromTo("#panel-photo", { opacity:0 }, { opacity:1, duration:0.15 })
-        .fromTo("#panel-name", { x:-10, opacity:0 }, { x:0, opacity:1, duration:0.15 })
-        .fromTo("#panel-name-en", { x:-10, opacity:0 }, { x:0, opacity:1, duration:0.1 })
-        .fromTo("#panel-desc", { y:6, opacity:0 }, { y:0, opacity:1, duration:0.15 });
+      // Slide open left panel
+      document.getElementById("info-panel").classList.add("open");
+      // Fade in content
+      const inner = document.getElementById("info-panel-inner");
+      gsap.fromTo(inner, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.3, delay: 0.15 });
     }
 
     function closePanel() {
-      gsap.to("#info-panel", { y:"100%", opacity:0, duration:0.25, ease:"power2.in",
-        onComplete: () => {
-          panelOpen = false;
-          document.querySelectorAll(".artifact.placed").forEach(h => gsap.to(h, { opacity:1, zIndex:10, duration:0.3 }));
-          document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity:1, duration:0.3 }));
-          document.getElementById("scene-dim").classList.remove("active");
-        }
-      });
+      document.getElementById("info-panel").classList.remove("open");
+      panelOpen = false;
+      document.querySelectorAll(".artifact.placed").forEach(h => gsap.to(h, { opacity:1, zIndex:10, duration:0.3 }));
+      document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity:1, duration:0.3 }));
+      document.getElementById("scene-dim").classList.remove("active");
     }
 
     function initPanelClose() {
       document.getElementById("panel-close").addEventListener("click", closePanel);
-      document.addEventListener("click", (e) => {
-        if (!panelOpen) return;
-        const panel = document.getElementById("info-panel");
-        if (!panel.contains(e.target) && !e.target.closest(".artifact")) closePanel();
-      });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && panelOpen) closePanel(); });
     }
 
