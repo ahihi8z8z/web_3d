@@ -15,9 +15,7 @@
       --indigo: #2D3A6B;
       --glow: rgba(200,150,62,0.35);
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: var(--bg);
       height: 100vh;
@@ -33,30 +31,32 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 24px;
+      padding: 8px 20px;
       background: linear-gradient(180deg, rgba(26,15,8,0.95), rgba(26,15,8,0.8));
       flex-shrink: 0;
       z-index: 50;
     }
     #site-header h1 {
       font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: var(--gold);
-      letter-spacing: 0.04em;
     }
     #counter {
-      font-family: 'Lora', serif;
       font-size: 0.85rem;
       color: var(--surface);
       opacity: 0.85;
     }
-    #found-count {
-      font-weight: 700;
-      color: var(--gold);
-      font-size: 1rem;
+    #found-count { font-weight: 700; color: var(--gold); }
+
+    /* ===== MAIN LAYOUT ===== */
+    #main-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
     }
 
-    /* ===== SCENE ===== */
+    /* ===== SCENE (left) ===== */
     #scene-wrapper {
       flex: 1;
       display: flex;
@@ -64,13 +64,14 @@
       align-items: center;
       overflow: hidden;
       padding: 8px;
+      min-width: 0;
     }
     #scene {
       position: relative;
       height: 100%;
-      max-height: calc(100vh - 100px);
+      max-height: calc(100vh - 80px);
       aspect-ratio: 1 / 1;
-      overflow: hidden;
+      overflow: visible;
       border-radius: 8px;
     }
     #room-bg {
@@ -79,8 +80,6 @@
       object-fit: contain;
       display: block;
     }
-
-    /* ===== SCENE DIM ===== */
     #scene-dim {
       position: absolute;
       inset: 0;
@@ -89,47 +88,105 @@
       z-index: 5;
       transition: background 0.3s;
     }
-    #scene-dim.active {
-      background: rgba(0,0,0,0.35);
+    #scene-dim.active { background: rgba(0,0,0,0.35); }
+
+    /* ===== ITEM TRAY (right sidebar) ===== */
+    #item-tray {
+      width: 180px;
+      flex-shrink: 0;
+      background: rgba(26,15,8,0.6);
+      border-left: 1px solid rgba(200,150,62,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #tray-header {
+      padding: 10px 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      text-align: center;
+      border-bottom: 1px solid rgba(200,150,62,0.15);
+      flex-shrink: 0;
+    }
+    #tray-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #tray-items::-webkit-scrollbar { width: 4px; }
+    #tray-items::-webkit-scrollbar-thumb { background: rgba(200,150,62,0.3); border-radius: 2px; }
+
+    .tray-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: rgba(200,150,62,0.08);
+      border: 1px solid rgba(200,150,62,0.15);
+      border-radius: 8px;
+      cursor: grab;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .tray-item:hover {
+      background: rgba(200,150,62,0.15);
+      border-color: rgba(200,150,62,0.3);
+    }
+    .tray-item.placed {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .tray-item img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3));
+      pointer-events: none;
+    }
+    .tray-item-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.65rem;
+      color: var(--gold);
+      line-height: 1.3;
+      pointer-events: none;
     }
 
-    /* ===== ARTIFACT (item on room) ===== */
+    /* ===== ARTIFACT on scene ===== */
     .artifact {
       position: absolute;
       cursor: grab;
       z-index: 10;
       transition: filter 0.3s;
       transform-origin: center center;
+      display: none; /* hidden until placed */
     }
+    .artifact.placed { display: block; }
     .artifact img {
       width: 100%;
-      height: 100%;
+      height: auto;
       object-fit: contain;
       pointer-events: none;
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
     }
-    .artifact:active {
-      cursor: grabbing;
-    }
-
-    /* Gold glow indicator for undiscovered */
+    .artifact:active { cursor: grabbing; }
     .artifact::after {
       content: '';
       position: absolute;
-      bottom: -4px;
-      left: 50%;
+      bottom: -4px; left: 50%;
       transform: translateX(-50%);
-      width: 60%;
-      height: 8px;
+      width: 60%; height: 8px;
       background: radial-gradient(ellipse, var(--glow) 0%, transparent 70%);
       animation: glow-pulse 2s ease-in-out infinite;
       border-radius: 50%;
     }
     @keyframes glow-pulse {
-      0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
-      50% { opacity: 1; transform: translateX(-50%) scale(1.3); }
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.8; transform: translateX(-50%) scale(1.2); }
     }
-
     .artifact .artifact-ring {
       position: absolute;
       top: 50%; left: 50%;
@@ -142,210 +199,132 @@
       pointer-events: none;
     }
     @keyframes artifact-ring-pulse {
-      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
       100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
     }
-
     .artifact.discovered::after { animation: none; opacity: 0; }
     .artifact.discovered .artifact-ring { animation: none; opacity: 0; }
     .artifact.discovered img {
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)) brightness(0.7) saturate(0.4);
     }
-
     .artifact-label {
       position: absolute;
-      bottom: -18px;
-      left: 50%;
+      bottom: -16px; left: 50%;
       transform: translateX(-50%);
       font-family: 'Playfair Display', serif;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--gold);
       white-space: nowrap;
       opacity: 0;
       transition: opacity 0.3s;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 6px rgba(0,0,0,0.9);
       pointer-events: none;
       font-weight: 600;
     }
     .artifact:hover .artifact-label { opacity: 1; }
-    .artifact.selected { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+    .artifact.selected, .decor.selected {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
 
-    /* ===== DECOR (also draggable) ===== */
+    /* ===== DECOR ===== */
     .decor {
       position: absolute;
       cursor: grab;
       z-index: 8;
+      display: none;
     }
+    .decor.placed { display: block; }
     .decor img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: auto;
       object-fit: contain;
       pointer-events: none;
       filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.3));
     }
     .decor:active { cursor: grabbing; }
-    .decor.selected { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
 
     /* ===== SPECIAL EFFECTS ===== */
     .artifact.fx-flame-burst img {
       filter: drop-shadow(0 0 15px rgba(255,100,0,0.7)) drop-shadow(0 0 30px rgba(255,60,0,0.4)) brightness(1.2);
     }
     .artifact.fx-ripple::before {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
+      content: ''; position: absolute; top: 50%; left: 50%;
       width: 120%; height: 120%;
-      border: 2px solid var(--gold);
-      border-radius: 50%;
+      border: 2px solid var(--gold); border-radius: 50%;
       transform: translate(-50%, -50%) scale(0);
-      animation: ripple-out 0.8s ease-out forwards;
-      pointer-events: none;
+      animation: ripple-out 0.8s ease-out forwards; pointer-events: none;
     }
-    @keyframes ripple-out {
-      to { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
-    }
-    .artifact.fx-pattern-glow img {
-      filter: drop-shadow(0 0 12px rgba(255,100,200,0.5)) drop-shadow(0 0 20px rgba(100,200,255,0.3)) brightness(1.15);
-    }
-    .artifact.fx-sparkle img {
-      filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(3px -3px 6px var(--gold)) drop-shadow(-3px -3px 6px var(--gold)) brightness(1.2);
-    }
+    @keyframes ripple-out { to { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+    .artifact.fx-pattern-glow img { filter: drop-shadow(0 0 12px rgba(255,100,200,0.5)) brightness(1.15); }
+    .artifact.fx-sparkle img { filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(3px -3px 6px var(--gold)) brightness(1.2); }
     .artifact.fx-sway { animation: sway-anim 0.5s ease-in-out; }
-    @keyframes sway-anim {
-      0% { transform: translateX(0); } 25% { transform: translateX(-6px); }
-      75% { transform: translateX(6px); } 100% { transform: translateX(0); }
-    }
-    .artifact.fx-smoke-puff img {
-      filter: drop-shadow(0 -10px 20px rgba(180,170,160,0.5)) drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
-    }
+    @keyframes sway-anim { 0%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} 100%{transform:translateX(0)} }
+    .artifact.fx-smoke-puff img { filter: drop-shadow(0 -10px 20px rgba(180,170,160,0.5)) drop-shadow(2px 4px 6px rgba(0,0,0,0.4)); }
     .artifact.fx-thread-weave { animation: thread-weave-anim 0.6s ease-in-out; }
-    @keyframes thread-weave-anim {
-      0% { transform: rotate(0deg); } 25% { transform: rotate(-2deg); }
-      75% { transform: rotate(2deg); } 100% { transform: rotate(0deg); }
-    }
+    @keyframes thread-weave-anim { 0%{transform:rotate(0)} 25%{transform:rotate(-2deg)} 75%{transform:rotate(2deg)} 100%{transform:rotate(0)} }
 
     /* ===== INFO PANEL ===== */
     #info-panel {
-      position: fixed;
-      bottom: 0; left: 50%;
+      position: fixed; bottom: 0; left: 50%;
       transform: translateX(-50%) translateY(100%);
-      width: min(680px, 95vw);
+      width: min(600px, 90vw);
       background: var(--surface);
       border: 1.5px solid var(--gold);
       border-bottom: none;
       border-radius: 20px 20px 0 0;
-      padding: 24px 28px;
+      padding: 20px 24px;
       box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
-      z-index: 100;
-      opacity: 0;
+      z-index: 100; opacity: 0;
     }
-    #panel-content { display: flex; gap: 20px; align-items: flex-start; }
+    #panel-content { display: flex; gap: 16px; align-items: flex-start; }
     #panel-photo-wrap {
-      flex-shrink: 0;
-      width: 120px; height: 120px;
-      border-radius: 12px;
-      border: 2px solid var(--gold);
-      overflow: hidden;
-      background: #e8dcc8;
+      flex-shrink: 0; width: 100px; height: 100px;
+      border-radius: 10px; border: 2px solid var(--gold);
+      overflow: hidden; background: #e8dcc8;
     }
     #panel-photo { width: 100%; height: 100%; object-fit: cover; }
-    #panel-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      color: var(--earth);
-      margin: 0 0 4px;
-    }
-    #panel-name-en {
-      font-family: 'Lora', serif;
-      font-size: 0.75rem;
-      color: var(--gold);
-      margin: 0 0 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    #panel-desc {
-      font-family: 'Lora', serif;
-      font-size: 0.9rem;
-      color: #4a3020;
-      line-height: 1.6;
-      margin: 0;
-    }
+    #panel-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--earth); margin: 0 0 3px; }
+    #panel-name-en { font-family: 'Lora', serif; font-size: 0.7rem; color: var(--gold); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    #panel-desc { font-family: 'Lora', serif; font-size: 0.85rem; color: #4a3020; line-height: 1.55; margin: 0; }
     #panel-close {
-      position: absolute;
-      top: 12px; right: 16px;
-      background: none;
-      border: none;
-      font-size: 1.3rem;
-      color: var(--earth);
-      cursor: pointer;
-      opacity: 0.6;
-      width: 28px; height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s;
+      position: absolute; top: 10px; right: 14px;
+      background: none; border: none; font-size: 1.2rem;
+      color: var(--earth); cursor: pointer; opacity: 0.6;
+      width: 26px; height: 26px; display: flex;
+      align-items: center; justify-content: center;
+      border-radius: 50%; transition: all 0.2s;
     }
     #panel-close:hover { opacity: 1; background: rgba(107,58,31,0.1); }
 
-    /* ===== COMPLETION OVERLAY ===== */
+    /* ===== COMPLETION ===== */
     #completion-overlay {
-      position: fixed; inset: 0;
-      background: rgba(26,15,8,0.9);
-      z-index: 150;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px;
-      backdrop-filter: blur(8px);
+      position: fixed; inset: 0; background: rgba(26,15,8,0.9);
+      z-index: 150; display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 40px; backdrop-filter: blur(8px);
     }
-    #completion-overlay h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      color: var(--gold);
-      margin-bottom: 16px;
-    }
-    #completion-overlay p {
-      color: var(--surface);
-      font-size: 0.95rem;
-      opacity: 0.8;
-      max-width: 500px;
-      line-height: 1.6;
-    }
+    #completion-overlay h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 12px; }
+    #completion-overlay p { color: var(--surface); font-size: 0.9rem; opacity: 0.8; max-width: 480px; line-height: 1.6; }
 
     /* ===== EDITOR BAR ===== */
     #editor-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 16px;
-      background: #222;
-      color: #fff;
-      font-family: monospace;
-      font-size: 12px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-      z-index: 300;
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 14px; background: #222; color: #fff;
+      font-family: monospace; font-size: 11px;
+      flex-shrink: 0; flex-wrap: wrap; z-index: 300;
     }
     #editor-bar .label { color: var(--gold); font-weight: bold; }
     #editor-bar .hint { opacity: 0.6; }
     #editor-bar button {
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: monospace;
-      font-size: 12px;
+      background: var(--gold); color: var(--bg); border: none;
+      padding: 3px 10px; border-radius: 3px; cursor: pointer;
+      font-family: monospace; font-size: 11px;
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header id="site-header">
     <h1>Ngôi Nhà Lô Lô Chải</h1>
     <div id="counter">
@@ -354,28 +333,34 @@
     </div>
   </header>
 
-  <!-- SCENE -->
-  <div id="scene-wrapper">
-    <div id="scene">
-      <img id="room-bg" src="assets/scene/room-bg.png" alt="Lo Lo Chai Room" />
-      <div id="scene-dim"></div>
+  <div id="main-area">
+    <!-- SCENE (left) -->
+    <div id="scene-wrapper">
+      <div id="scene">
+        <img id="room-bg" src="assets/scene/room-bg.png" alt="Lo Lo Chai Room" />
+        <div id="scene-dim"></div>
+      </div>
+    </div>
+
+    <!-- ITEM TRAY (right) -->
+    <div id="item-tray">
+      <div id="tray-header">Vật Phẩm</div>
+      <div id="tray-items">
+        <!-- filled by JS -->
+      </div>
     </div>
   </div>
 
-  <!-- EDITOR BAR (always visible) -->
   <div id="editor-bar">
-    <span class="label">SẮP XẾP CĂN PHÒNG</span>
-    <span id="editor-coords" class="hint">Kéo thả vật phẩm | Click chọn rồi: R xoay, +/- kích thước, F lật | Double-click xem chi tiết</span>
-    <button id="editor-export" style="margin-left:auto;">Export tọa độ</button>
+    <span class="label">SẮP XẾP</span>
+    <span id="editor-coords" class="hint">Kéo vật phẩm từ khung phải vào phòng | Chọn rồi: R xoay, +/- size, F lật | Double-click xem chi tiết</span>
+    <button id="editor-export" style="margin-left:auto;">Export</button>
   </div>
 
-  <!-- INFO PANEL -->
   <div id="info-panel">
     <button id="panel-close">&times;</button>
     <div id="panel-content">
-      <div id="panel-photo-wrap">
-        <img id="panel-photo" src="" alt="" />
-      </div>
+      <div id="panel-photo-wrap"><img id="panel-photo" src="" alt="" /></div>
       <div id="panel-text">
         <h2 id="panel-name"></h2>
         <p id="panel-name-en"></p>
@@ -384,117 +369,60 @@
     </div>
   </div>
 
-  <!-- COMPLETION OVERLAY -->
   <div id="completion-overlay">
     <h2>Bạn đã khám phá tất cả 9 vật phẩm!</h2>
-    <p>
-      Mỗi vật phẩm là một mảnh ghép của văn hóa Lô Lô Chải —
-      từ ngọn lửa bếp ấm cúng đến tiếng trống đồng vang vọng.
-      Cảm ơn bạn đã đồng hành trên hành trình này.
-    </p>
+    <p>Mỗi vật phẩm là một mảnh ghép của văn hóa Lô Lô Chải — từ ngọn lửa bếp ấm cúng đến tiếng trống đồng vang vọng.</p>
   </div>
 
   <script>
     const ARTIFACTS = [
-      {
-        id: "bep-lua",
-        name: "Bếp Lửa",
-        nameEn: "Sacred Fireplace",
-        description: "Bếp lửa là trung tâm của không gian sinh hoạt trong ngôi nhà truyền thống, nơi gắn với việc nấu ăn, sưởi ấm và quây quần gia đình. Ngọn lửa chưa bao giờ tắt. Đây là chi tiết quan trọng giúp toàn bộ góc nhà có hồn và có hơi thở đời sống.",
-        photo: "assets/artifacts/01-bep-lua.png",
-        sprite: "assets/artifacts/01-bep-lua-3d.png",
-        x: 22, y: 74, w: 14,
-        sound: "fire", specialEffect: "flame-burst"
-      },
-      {
-        id: "noi-dong",
-        name: "Nồi Đồng",
-        nameEn: "Bronze Pot",
-        description: "Nồi đồng là vật dụng quen thuộc trong gian bếp truyền thống, gợi cảm giác đời sống gia đình mộc mạc và giản dị. Khi đặt trên bếp lửa, nồi đồng giúp cảnh vật trở nên sinh động và tự nhiên hơn.",
-        photo: "assets/artifacts/02-noi-dong.png",
-        sprite: "assets/artifacts/02-noi-dong-3d.png",
-        x: 20, y: 67, w: 8,
-        sound: null, specialEffect: "smoke-puff"
-      },
-      {
-        id: "gui-tre",
-        name: "Gùi Tre",
-        nameEn: "Bamboo Basket",
-        description: "Gùi tre là vật dụng quen thuộc trong đời sống của người dân vùng cao, thường dùng để mang đồ, đựng nông sản hoặc vật dụng hằng ngày. Đưa gùi vào mô hình sẽ giúp góc nhà thêm tự nhiên và giàu bản sắc địa phương.",
-        photo: "assets/artifacts/03-gui-tre.png",
-        sprite: "assets/artifacts/03-gui-tre-3d.png",
-        x: 34, y: 73, w: 7,
-        sound: null, specialEffect: "sway"
-      },
-      {
-        id: "trong-dong",
-        name: "Trống Đồng",
-        nameEn: "Bronze Drum",
-        description: "Trống đồng là biểu tượng văn hóa đặc trưng, gắn với đời sống tinh thần và bản sắc của cộng đồng Lô Lô. Tiếng trống vang lên mỗi dịp lễ hội. Dù được cách điệu theo phong cách chibi, vật phẩm này vẫn cần giữ nét trang trọng và nổi bật.",
-        photo: "assets/artifacts/04-trong-dong.png",
-        sprite: "assets/artifacts/04-trong-dong-3d.png",
-        x: 14, y: 81, w: 9,
-        sound: "drum", specialEffect: "ripple"
-      },
-      {
-        id: "vay-ao",
-        name: "Váy Áo Lô Lô",
-        nameEn: "Traditional Costume",
-        description: "Váy áo Lô Lô là trang phục truyền thống đặc trưng nhất của phụ nữ dân tộc Lô Lô Chải, được may thủ công từ vải thổ cẩm với những họa văn thêu tay tinh xảo, màu sắc rực rỡ mang đậm bản sắc văn hóa miền núi.",
-        photo: "assets/artifacts/05-vay-ao.png",
-        sprite: "assets/artifacts/05-vay-ao-3d.png",
-        x: 76, y: 30, w: 9,
-        sound: null, specialEffect: "pattern-glow"
-      },
-      {
-        id: "khung-cui",
-        name: "Khung Cửi",
-        nameEn: "Weaving Loom",
-        description: "Khung cửi dệt vải là dụng cụ truyền thống quan trọng nhất trong văn hóa người Lô Lô Chải, giúp các phụ nữ dân tộc dệt nên những tấm vải thổ cẩm với hoa văn độc đáo, rực rỡ. Không chỉ là công cụ lao động hàng ngày, khung cửi còn thể hiện sự khéo léo, cần cù và bản sắc văn hóa của cộng đồng.",
-        photo: "assets/artifacts/06-khung-cui.png",
-        sprite: "assets/artifacts/06-khung-cui-3d.png",
-        x: 68, y: 68, w: 14,
-        sound: null, specialEffect: "thread-weave"
-      },
-      {
-        id: "mu-trang-suc",
-        name: "Mũ & Trang Sức",
-        nameEn: "Hat & Silver Jewelry",
-        description: "Mũ truyền thống là chi tiết nổi bật nhất trong trang phục phụ nữ Lô Lô Chải, được làm từ nhiều lớp vải thổ cẩm với màu sắc rực rỡ, hàng cúc kim loại và vô số tua rua, pom-pom xinh xắn. Trang sức bạc là \"báu vật\" không thể thiếu — vòng cổ to bản, khuyên tai dài, lắc tay chế tác thủ công tinh xảo từ bạc nguyên chất.",
-        photo: "assets/artifacts/07-mu.png",
-        sprite: "assets/artifacts/07-mu-3d.png",
-        x: 84, y: 32, w: 8,
-        sound: null, specialEffect: "sparkle"
-      },
-      {
-        id: "phan-go",
-        name: "Phản Gỗ",
-        nameEn: "Wooden Platform Bed",
-        description: "Phản gỗ thấp là nơi ngồi nghỉ và sum vầy giản dị nhưng tràn đầy hơi ấm của gia đình người Lô Lô Chải sau ngày làm nương rẫy. Chiếc phản gỗ thấp sát sàn giúp giữ ấm vào mùa đông giá rét vùng cao, đồng thời thể hiện lối sống gần gũi với đất trời và truyền thống dân tộc.",
-        photo: "assets/artifacts/08-phan-go.jpg",
-        sprite: "assets/artifacts/08-phan-go-3d.png",
-        x: 46, y: 62, w: 16,
-        sound: null, specialEffect: "sway"
-      },
-      {
-        id: "mam-go",
-        name: "Mâm Gỗ",
-        nameEn: "Wooden Tray",
-        description: "Mâm gỗ là vật dụng quen thuộc trong bữa ăn gia đình người Lô Lô Chải, nơi mọi người quây quần bên mâm cơm dân dã. Nó tượng trưng cho sự đoàn kết, chia sẻ và hiếu khách của cộng đồng. Chiếc mâm gỗ mộc mạc góp phần tạo nên không khí ấm cúng, gần gũi của ngôi nhà truyền thống vùng cao.",
-        photo: "assets/artifacts/09-mam-go.jpg",
-        sprite: "assets/artifacts/09-mam-go-3d.png",
-        x: 50, y: 74, w: 10,
-        sound: null, specialEffect: null
-      }
+      { id:"bep-lua", name:"Bếp Lửa", nameEn:"Sacred Fireplace",
+        description:"Bếp lửa là trung tâm của không gian sinh hoạt trong ngôi nhà truyền thống, nơi gắn với việc nấu ăn, sưởi ấm và quây quần gia đình. Ngọn lửa chưa bao giờ tắt. Đây là chi tiết quan trọng giúp toàn bộ góc nhà có hồn và có hơi thở đời sống.",
+        photo:"assets/artifacts/01-bep-lua.png", sprite:"assets/artifacts/01-bep-lua-3d.png",
+        sound:"fire", specialEffect:"flame-burst" },
+      { id:"noi-dong", name:"Nồi Đồng", nameEn:"Bronze Pot",
+        description:"Nồi đồng là vật dụng quen thuộc trong gian bếp truyền thống, gợi cảm giác đời sống gia đình mộc mạc và giản dị. Khi đặt trên bếp lửa, nồi đồng giúp cảnh vật trở nên sinh động và tự nhiên hơn.",
+        photo:"assets/artifacts/02-noi-dong.png", sprite:"assets/artifacts/02-noi-dong-3d.png",
+        sound:null, specialEffect:"smoke-puff" },
+      { id:"gui-tre", name:"Gùi Tre", nameEn:"Bamboo Basket",
+        description:"Gùi tre là vật dụng quen thuộc trong đời sống của người dân vùng cao, thường dùng để mang đồ, đựng nông sản hoặc vật dụng hằng ngày. Đưa gùi vào mô hình sẽ giúp góc nhà thêm tự nhiên và giàu bản sắc địa phương.",
+        photo:"assets/artifacts/03-gui-tre.png", sprite:"assets/artifacts/03-gui-tre-3d.png",
+        sound:null, specialEffect:"sway" },
+      { id:"trong-dong", name:"Trống Đồng", nameEn:"Bronze Drum",
+        description:"Trống đồng là biểu tượng văn hóa đặc trưng, gắn với đời sống tinh thần và bản sắc của cộng đồng Lô Lô. Tiếng trống vang lên mỗi dịp lễ hội. Dù được cách điệu theo phong cách chibi, vật phẩm này vẫn cần giữ nét trang trọng và nổi bật.",
+        photo:"assets/artifacts/04-trong-dong.png", sprite:"assets/artifacts/04-trong-dong-3d.png",
+        sound:"drum", specialEffect:"ripple" },
+      { id:"vay-ao", name:"Váy Áo Lô Lô", nameEn:"Traditional Costume",
+        description:"Váy áo Lô Lô là trang phục truyền thống đặc trưng nhất của phụ nữ dân tộc Lô Lô Chải, được may thủ công từ vải thổ cẩm với những họa văn thêu tay tinh xảo, màu sắc rực rỡ mang đậm bản sắc văn hóa miền núi.",
+        photo:"assets/artifacts/05-vay-ao.png", sprite:"assets/artifacts/05-vay-ao-3d.png",
+        sound:null, specialEffect:"pattern-glow" },
+      { id:"khung-cui", name:"Khung Cửi", nameEn:"Weaving Loom",
+        description:"Khung cửi dệt vải là dụng cụ truyền thống quan trọng nhất trong văn hóa người Lô Lô Chải, giúp các phụ nữ dân tộc dệt nên những tấm vải thổ cẩm với hoa văn độc đáo, rực rỡ. Không chỉ là công cụ lao động hàng ngày, khung cửi còn thể hiện sự khéo léo, cần cù và bản sắc văn hóa của cộng đồng.",
+        photo:"assets/artifacts/06-khung-cui.png", sprite:"assets/artifacts/06-khung-cui-3d.png",
+        sound:null, specialEffect:"thread-weave" },
+      { id:"mu-trang-suc", name:"Mũ & Trang Sức", nameEn:"Hat & Silver Jewelry",
+        description:"Mũ truyền thống là chi tiết nổi bật nhất trong trang phục phụ nữ Lô Lô Chải, được làm từ nhiều lớp vải thổ cẩm với màu sắc rực rỡ, hàng cúc kim loại và vô số tua rua, pom-pom xinh xắn. Trang sức bạc là \"báu vật\" không thể thiếu — vòng cổ to bản, khuyên tai dài, lắc tay chế tác thủ công tinh xảo từ bạc nguyên chất.",
+        photo:"assets/artifacts/07-mu.png", sprite:"assets/artifacts/07-mu-3d.png",
+        sound:null, specialEffect:"sparkle" },
+      { id:"phan-go", name:"Phản Gỗ", nameEn:"Wooden Platform Bed",
+        description:"Phản gỗ thấp là nơi ngồi nghỉ và sum vầy giản dị nhưng tràn đầy hơi ấm của gia đình người Lô Lô Chải sau ngày làm nương rẫy. Chiếc phản gỗ thấp sát sàn giúp giữ ấm vào mùa đông giá rét vùng cao, đồng thời thể hiện lối sống gần gũi với đất trời và truyền thống dân tộc.",
+        photo:"assets/artifacts/08-phan-go.jpg", sprite:"assets/artifacts/08-phan-go-3d.png",
+        sound:null, specialEffect:"sway" },
+      { id:"mam-go", name:"Mâm Gỗ", nameEn:"Wooden Tray",
+        description:"Mâm gỗ là vật dụng quen thuộc trong bữa ăn gia đình người Lô Lô Chải, nơi mọi người quây quần bên mâm cơm dân dã. Nó tượng trưng cho sự đoàn kết, chia sẻ và hiếu khách của cộng đồng. Chiếc mâm gỗ mộc mạc góp phần tạo nên không khí ấm cúng, gần gũi của ngôi nhà truyền thống vùng cao.",
+        photo:"assets/artifacts/09-mam-go.jpg", sprite:"assets/artifacts/09-mam-go-3d.png",
+        sound:null, specialEffect:null }
     ];
 
     const DECOR = [
-      { src: "assets/decor/goi.png", x: 48, y: 57, w: 8 },
-      { src: "assets/decor/den-dau.png", x: 56, y: 70, w: 5 },
-      { src: "assets/decor/chum-ngo.png", x: 30, y: 42, w: 8 },
-      { src: "assets/decor/thung-ro.png", x: 78, y: 72, w: 8 },
-      { src: "assets/decor/chum-ruou.png", x: 38, y: 66, w: 6 },
+      { id:"goi", name:"Gối", src:"assets/decor/goi.png" },
+      { id:"den-dau", name:"Đèn Dầu", src:"assets/decor/den-dau.png" },
+      { id:"chum-ngo", name:"Chùm Ngô", src:"assets/decor/chum-ngo.png" },
+      { id:"thung-ro", name:"Thúng Rổ", src:"assets/decor/thung-ro.png" },
+      { id:"chum-ruou", name:"Chum Rượu", src:"assets/decor/chum-ruou.png" },
     ];
+
+    const ITEM_SIZE = 10; // uniform width % when placed on scene
 
     // ===== STATE =====
     let discoveredCount = 0;
@@ -504,67 +432,136 @@
     let dragOffsetX = 0, dragOffsetY = 0;
     let selectedEl = null;
     let isDragging = false;
+    // Track which items are placed on scene
+    const placedItems = new Set();
 
     // ===== INIT =====
     window.addEventListener("DOMContentLoaded", () => {
-      initDecor();
-      initArtifacts();
+      buildTray();
+      buildSceneElements();
       initPanelClose();
       initEditor();
     });
 
-    // ===== DECOR =====
-    function initDecor() {
+    // ===== BUILD TRAY =====
+    function buildTray() {
+      const tray = document.getElementById("tray-items");
+
+      // Artifacts
+      ARTIFACTS.forEach(a => {
+        const item = document.createElement("div");
+        item.className = "tray-item";
+        item.dataset.type = "artifact";
+        item.dataset.id = a.id;
+        item.innerHTML = `<img src="${a.sprite}" alt="${a.name}" /><span class="tray-item-name">${a.name}</span>`;
+        item.addEventListener("mousedown", (e) => startTrayDrag(e, a.id, "artifact"));
+        tray.appendChild(item);
+      });
+
+      // Separator
+      const sep = document.createElement("div");
+      sep.style.cssText = "border-top:1px solid rgba(200,150,62,0.15);margin:6px 0;flex-shrink:0;";
+      tray.appendChild(sep);
+
+      // Decor label
+      const label = document.createElement("div");
+      label.style.cssText = "font-family:'Playfair Display',serif;font-size:0.7rem;color:rgba(200,150,62,0.5);text-align:center;padding:2px 0;flex-shrink:0;";
+      label.textContent = "Trang Trí";
+      tray.appendChild(label);
+
+      // Decor items
+      DECOR.forEach(d => {
+        const item = document.createElement("div");
+        item.className = "tray-item";
+        item.dataset.type = "decor";
+        item.dataset.id = d.id;
+        item.innerHTML = `<img src="${d.src}" alt="${d.name}" /><span class="tray-item-name">${d.name}</span>`;
+        item.addEventListener("mousedown", (e) => startTrayDrag(e, d.id, "decor"));
+        tray.appendChild(item);
+      });
+    }
+
+    // ===== BUILD SCENE ELEMENTS (hidden until placed) =====
+    function buildSceneElements() {
       const scene = document.getElementById("scene");
-      DECOR.forEach((d, i) => {
+
+      ARTIFACTS.forEach(a => {
+        const el = document.createElement("div");
+        el.className = "artifact";
+        el.dataset.id = a.id;
+        el.style.cssText = `left:50%;top:50%;width:${ITEM_SIZE}%;`;
+        el.innerHTML = `
+          <img src="${a.sprite}" alt="${a.name}" />
+          <div class="artifact-ring"></div>
+          <span class="artifact-label">${a.name}</span>
+        `;
+        el.addEventListener("mouseenter", () => {
+          if (panelOpen || isDragging) return;
+          gsap.to(el, { y: -3, scale: 1.04, duration: 0.2, ease: "back.out(2)" });
+        });
+        el.addEventListener("mouseleave", () => {
+          if (isDragging) return;
+          gsap.to(el, { y: 0, scale: 1, duration: 0.2, ease: "power2.out" });
+        });
+        el.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          onArtifactDblClick(a, el);
+        });
+        scene.appendChild(el);
+      });
+
+      DECOR.forEach(d => {
         const el = document.createElement("div");
         el.className = "decor";
-        el.dataset.decorIdx = i;
-        el.style.cssText = `left:${d.x}%;top:${d.y}%;width:${d.w}%;`;
-        el.innerHTML = `<img src="${d.src}" alt="decor" style="width:100%;height:auto;" />`;
+        el.dataset.id = d.id;
+        el.style.cssText = `left:50%;top:50%;width:${ITEM_SIZE}%;`;
+        el.innerHTML = `<img src="${d.src}" alt="${d.name}" />`;
         scene.appendChild(el);
       });
     }
 
-    // ===== ARTIFACTS =====
-    function initArtifacts() {
+    // ===== TRAY DRAG → PLACE ON SCENE =====
+    function startTrayDrag(e, id, type) {
+      if (placedItems.has(id)) return;
+      e.preventDefault();
+
       const scene = document.getElementById("scene");
-      ARTIFACTS.forEach(artifact => {
-        const el = document.createElement("div");
-        el.className = "artifact";
-        el.dataset.id = artifact.id;
-        el.style.cssText = `left:${artifact.x}%;top:${artifact.y}%;width:${artifact.w}%;`;
-        el.innerHTML = `
-          <img src="${artifact.sprite}" alt="${artifact.name}" />
-          <div class="artifact-ring"></div>
-          <span class="artifact-label">${artifact.name}</span>
-        `;
+      const sceneRect = scene.getBoundingClientRect();
+      const sel = type === "artifact"
+        ? scene.querySelector(`.artifact[data-id="${id}"]`)
+        : scene.querySelector(`.decor[data-id="${id}"]`);
 
-        // Hover — chibi bounce (only when not dragging)
-        el.addEventListener("mouseenter", () => {
-          if (panelOpen || isDragging) return;
-          gsap.to(el, { y: -4, scale: 1.05, duration: 0.25, ease: "back.out(2)" });
-        });
-        el.addEventListener("mouseleave", () => {
-          if (isDragging) return;
-          gsap.to(el, { y: 0, scale: 1, duration: 0.25, ease: "power2.out" });
-        });
+      // Show element and start dragging it
+      sel.classList.add("placed");
+      placedItems.add(id);
 
-        // Double-click → show info panel
-        el.addEventListener("dblclick", (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          onArtifactDblClick(artifact, el);
-        });
+      // Mark tray item as placed
+      const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
+      if (trayItem) trayItem.classList.add("placed");
 
-        scene.appendChild(el);
-      });
+      // Position at mouse
+      const x = ((e.clientX - sceneRect.left) / sceneRect.width * 100);
+      const y = ((e.clientY - sceneRect.top) / sceneRect.height * 100);
+      sel.style.left = x + "%";
+      sel.style.top = y + "%";
+
+      // Start drag immediately
+      dragTarget = sel;
+      isDragging = true;
+      const elRect = sel.getBoundingClientRect();
+      dragOffsetX = elRect.width / 2;
+      dragOffsetY = elRect.height / 2;
+
+      // Select it
+      if (selectedEl) selectedEl.classList.remove("selected");
+      selectedEl = sel;
+      sel.classList.add("selected");
+      updateEditorInfo(sel);
     }
 
     // ===== DOUBLE-CLICK → INFO =====
     function onArtifactDblClick(artifact, el) {
       if (panelOpen) return;
-
       if (!discovered.has(artifact.id)) {
         discovered.add(artifact.id);
         discoveredCount++;
@@ -572,64 +569,43 @@
         el.classList.add("discovered");
         if (discoveredCount === 9) setTimeout(showCompletion, 1500);
       }
-
-      // Bounce
       gsap.timeline()
-        .to(el, { scale: 1.15, duration: 0.1, ease: "power2.out" })
-        .to(el, { scale: 0.92, duration: 0.1 })
-        .to(el, { scale: 1.0, y: 0, duration: 0.12 });
-
-      // Special effect
+        .to(el, { scale: 1.12, duration: 0.1, ease: "power2.out" })
+        .to(el, { scale: 0.93, duration: 0.1 })
+        .to(el, { scale: 1.0, y: 0, duration: 0.1 });
       if (artifact.specialEffect) {
         el.classList.add("fx-" + artifact.specialEffect);
         setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 1000);
       }
-
-      // Dim others
-      document.querySelectorAll(".artifact").forEach(h => {
+      document.querySelectorAll(".artifact.placed").forEach(h => {
         if (h !== el) gsap.to(h, { opacity: 0.25, duration: 0.3 });
       });
-      document.querySelectorAll(".decor").forEach(d => {
-        gsap.to(d, { opacity: 0.25, duration: 0.3 });
-      });
+      document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity: 0.25, duration: 0.3 }));
       document.getElementById("scene-dim").classList.add("active");
       gsap.to(el, { zIndex: 20, duration: 0 });
-
-      if (artifact.sound) console.log("sound:", artifact.sound);
       openPanel(artifact);
     }
 
-    // ===== PANEL =====
     function openPanel(artifact) {
       panelOpen = true;
       document.getElementById("panel-photo").src = artifact.photo;
-      document.getElementById("panel-photo").alt = artifact.name;
       document.getElementById("panel-name").textContent = artifact.name;
       document.getElementById("panel-name-en").textContent = artifact.nameEn;
       document.getElementById("panel-desc").textContent = artifact.description;
-
-      gsap.fromTo("#info-panel",
-        { y: "100%", opacity: 0 },
-        { y: "0%", opacity: 1, duration: 0.35, ease: "power3.out", delay: 0.15 }
-      );
-      const tl = gsap.timeline({ delay: 0.4 });
-      tl.fromTo("#panel-photo", { opacity: 0 }, { opacity: 1, duration: 0.2 })
-        .fromTo("#panel-name", { x: -15, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2 })
-        .fromTo("#panel-name-en", { x: -15, opacity: 0 }, { x: 0, opacity: 1, duration: 0.15 })
-        .fromTo("#panel-desc", { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 });
+      gsap.fromTo("#info-panel", { y:"100%", opacity:0 }, { y:"0%", opacity:1, duration:0.3, ease:"power3.out", delay:0.1 });
+      const tl = gsap.timeline({ delay: 0.35 });
+      tl.fromTo("#panel-photo", { opacity:0 }, { opacity:1, duration:0.15 })
+        .fromTo("#panel-name", { x:-10, opacity:0 }, { x:0, opacity:1, duration:0.15 })
+        .fromTo("#panel-name-en", { x:-10, opacity:0 }, { x:0, opacity:1, duration:0.1 })
+        .fromTo("#panel-desc", { y:6, opacity:0 }, { y:0, opacity:1, duration:0.15 });
     }
 
     function closePanel() {
-      gsap.to("#info-panel", {
-        y: "100%", opacity: 0, duration: 0.3, ease: "power2.in",
+      gsap.to("#info-panel", { y:"100%", opacity:0, duration:0.25, ease:"power2.in",
         onComplete: () => {
           panelOpen = false;
-          document.querySelectorAll(".artifact").forEach(h => {
-            gsap.to(h, { opacity: 1, zIndex: 10, duration: 0.3 });
-          });
-          document.querySelectorAll(".decor").forEach(d => {
-            gsap.to(d, { opacity: 1, duration: 0.3 });
-          });
+          document.querySelectorAll(".artifact.placed").forEach(h => gsap.to(h, { opacity:1, zIndex:10, duration:0.3 }));
+          document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity:1, duration:0.3 }));
           document.getElementById("scene-dim").classList.remove("active");
         }
       });
@@ -642,64 +618,66 @@
         const panel = document.getElementById("info-panel");
         if (!panel.contains(e.target) && !e.target.closest(".artifact")) closePanel();
       });
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && panelOpen) closePanel();
-      });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && panelOpen) closePanel(); });
     }
 
-    // ===== COMPLETION =====
     function showCompletion() {
-      const overlay = document.getElementById("completion-overlay");
-      overlay.style.display = "flex";
-      gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
+      const o = document.getElementById("completion-overlay");
+      o.style.display = "flex";
+      gsap.fromTo(o, { opacity:0 }, { opacity:1, duration:0.5 });
     }
 
-    // ===== EDITOR (always active) =====
+    // ===== EDITOR =====
     function initEditor() {
       document.getElementById("editor-export").addEventListener("click", exportPositions);
 
-      // Keyboard controls
       document.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if (!selectedEl) return;
-
         const rot = parseFloat(selectedEl.dataset.rotate || 0);
         const scl = parseFloat(selectedEl.dataset.editorScale || 100);
-
         if (e.key === "r" || e.key === "R") {
-          const delta = e.shiftKey ? -5 : 5;
-          selectedEl.dataset.rotate = rot + delta;
-          applyTransform(selectedEl);
-          updateEditorInfo(selectedEl);
+          selectedEl.dataset.rotate = rot + (e.shiftKey ? -5 : 5);
+          applyTransform(selectedEl); updateEditorInfo(selectedEl);
         }
         if (e.key === "+" || e.key === "=") {
           selectedEl.dataset.editorScale = scl + 5;
-          applyTransform(selectedEl);
-          updateEditorInfo(selectedEl);
+          applyTransform(selectedEl); updateEditorInfo(selectedEl);
         }
         if (e.key === "-" || e.key === "_") {
           selectedEl.dataset.editorScale = Math.max(10, scl - 5);
-          applyTransform(selectedEl);
-          updateEditorInfo(selectedEl);
+          applyTransform(selectedEl); updateEditorInfo(selectedEl);
         }
         if (e.key === "f" || e.key === "F") {
           selectedEl.dataset.flip = selectedEl.dataset.flip === "1" ? "0" : "1";
-          applyTransform(selectedEl);
-          updateEditorInfo(selectedEl);
+          applyTransform(selectedEl); updateEditorInfo(selectedEl);
+        }
+        // Delete: return item to tray
+        if (e.key === "Delete" || e.key === "Backspace") {
+          const id = selectedEl.dataset.id;
+          if (id && placedItems.has(id)) {
+            selectedEl.classList.remove("placed", "selected");
+            selectedEl.dataset.rotate = 0;
+            selectedEl.dataset.editorScale = 100;
+            selectedEl.dataset.flip = "0";
+            selectedEl.style.transform = "";
+            placedItems.delete(id);
+            const trayItem = document.querySelector(`.tray-item[data-id="${id}"]`);
+            if (trayItem) trayItem.classList.remove("placed");
+            selectedEl = null;
+            document.getElementById("editor-coords").textContent = "Đã trả vật phẩm về khung";
+          }
         }
       });
 
-      // Click to select
+      // Click on scene items to select + start drag
       document.addEventListener("mousedown", (e) => {
-        const el = e.target.closest(".artifact, .decor");
+        const el = e.target.closest(".artifact.placed, .decor.placed");
         if (el) {
-          // Deselect previous
           if (selectedEl && selectedEl !== el) selectedEl.classList.remove("selected");
           selectedEl = el;
           selectedEl.classList.add("selected");
           updateEditorInfo(el);
-
-          // Start drag
           if (panelOpen) return;
           e.preventDefault();
           dragTarget = el;
@@ -707,12 +685,8 @@
           const elRect = el.getBoundingClientRect();
           dragOffsetX = e.clientX - elRect.left;
           dragOffsetY = e.clientY - elRect.top;
-        } else {
-          // Click empty area → deselect
-          if (selectedEl) {
-            selectedEl.classList.remove("selected");
-            selectedEl = null;
-          }
+        } else if (!e.target.closest(".tray-item") && !e.target.closest("#info-panel") && !e.target.closest("#editor-bar")) {
+          if (selectedEl) { selectedEl.classList.remove("selected"); selectedEl = null; }
         }
       });
 
@@ -738,60 +712,51 @@
     }
 
     function applyTransform(el) {
-      const rotate = parseFloat(el.dataset.rotate || 0);
-      const scale = parseFloat(el.dataset.editorScale || 100) / 100;
-      const flip = el.dataset.flip === "1" ? -1 : 1;
-      el.style.transform = `rotate(${rotate}deg) scale(${scale * flip}, ${scale})`;
+      const r = parseFloat(el.dataset.rotate || 0);
+      const s = parseFloat(el.dataset.editorScale || 100) / 100;
+      const f = el.dataset.flip === "1" ? -1 : 1;
+      el.style.transform = `rotate(${r}deg) scale(${s * f}, ${s})`;
     }
 
     function updateEditorInfo(el) {
-      const id = el.dataset.id || `decor-${el.dataset.decorIdx || '?'}`;
+      const id = el.dataset.id || "?";
       const x = parseFloat(el.style.left).toFixed(1);
       const y = parseFloat(el.style.top).toFixed(1);
-      const rotate = parseFloat(el.dataset.rotate || 0);
-      const scale = parseFloat(el.dataset.editorScale || 100);
-      const flip = el.dataset.flip === "1" ? " lật" : "";
+      const r = parseFloat(el.dataset.rotate || 0);
+      const s = parseFloat(el.dataset.editorScale || 100);
+      const f = el.dataset.flip === "1" ? " lật" : "";
       document.getElementById("editor-coords").textContent =
-        `${id}: x=${x}, y=${y}, xoay=${rotate}°, size=${scale}%${flip}`;
+        `${id}: x=${x}, y=${y}, xoay=${r}°, size=${s}%${f} | Delete=trả về`;
     }
 
     function exportPositions() {
       const scene = document.getElementById("scene");
       const rect = scene.getBoundingClientRect();
       let output = "// === VỊ TRÍ VẬT PHẨM ===\n";
-      document.querySelectorAll(".artifact").forEach(el => {
+      document.querySelectorAll(".artifact.placed").forEach(el => {
         const id = el.dataset.id;
         const x = parseFloat(el.style.left).toFixed(1);
         const y = parseFloat(el.style.top).toFixed(1);
-        const w = (el.getBoundingClientRect().width / rect.width * 100).toFixed(1);
-        const rotate = parseFloat(el.dataset.rotate || 0);
-        const scale = parseFloat(el.dataset.editorScale || 100);
-        const flip = el.dataset.flip === "1";
-        let line = `${id}: x: ${x}, y: ${y}, w: ${w}`;
-        if (rotate !== 0) line += `, rotate: ${rotate}`;
-        if (scale !== 100) line += `, scale: ${scale}`;
-        if (flip) line += `, flip: true`;
+        const r = parseFloat(el.dataset.rotate || 0);
+        const s = parseFloat(el.dataset.editorScale || 100);
+        const f = el.dataset.flip === "1";
+        let line = `${id}: x:${x}, y:${y}`;
+        if (r) line += `, rotate:${r}`; if (s!==100) line += `, scale:${s}`; if (f) line += `, flip`;
         output += line + "\n";
       });
-      output += "\n// === VẬT TRANG TRÍ ===\n";
-      document.querySelectorAll(".decor").forEach((el, i) => {
+      output += "\n// === TRANG TRÍ ===\n";
+      document.querySelectorAll(".decor.placed").forEach(el => {
+        const id = el.dataset.id;
         const x = parseFloat(el.style.left).toFixed(1);
         const y = parseFloat(el.style.top).toFixed(1);
-        const w = (el.getBoundingClientRect().width / rect.width * 100).toFixed(1);
-        const rotate = parseFloat(el.dataset.rotate || 0);
-        const scale = parseFloat(el.dataset.editorScale || 100);
-        const flip = el.dataset.flip === "1";
-        let line = `decor-${i}: x: ${x}, y: ${y}, w: ${w}`;
-        if (rotate !== 0) line += `, rotate: ${rotate}`;
-        if (scale !== 100) line += `, scale: ${scale}`;
-        if (flip) line += `, flip: true`;
+        const r = parseFloat(el.dataset.rotate || 0);
+        const s = parseFloat(el.dataset.editorScale || 100);
+        const f = el.dataset.flip === "1";
+        let line = `${id}: x:${x}, y:${y}`;
+        if (r) line += `, rotate:${r}`; if (s!==100) line += `, scale:${s}`; if (f) line += `, flip`;
         output += line + "\n";
       });
-      navigator.clipboard.writeText(output).then(() => {
-        alert("Đã copy tọa độ!\n\n" + output);
-      }).catch(() => {
-        prompt("Copy tọa độ:", output);
-      });
+      navigator.clipboard.writeText(output).then(() => alert("Đã copy!\n\n" + output)).catch(() => prompt("Copy:", output));
     }
   </script>
 </body>
