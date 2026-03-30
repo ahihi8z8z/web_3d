@@ -779,6 +779,107 @@
       overlay.style.display = "flex";
       gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
     }
+
+    // ===== EDITOR MODE (press E to toggle) =====
+    let editorMode = false;
+    let dragTarget = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "e" || e.key === "E") {
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+        editorMode = !editorMode;
+        document.getElementById("editor-bar").style.display = editorMode ? "flex" : "none";
+        document.querySelectorAll(".artifact, .decor").forEach(el => {
+          el.style.cursor = editorMode ? "grab" : "";
+        });
+        // Hide intro if editor mode
+        if (editorMode) {
+          const intro = document.getElementById("intro-overlay");
+          if (intro) intro.style.display = "none";
+        }
+      }
+    });
+
+    // Editor bar UI
+    window.addEventListener("DOMContentLoaded", () => {
+      const bar = document.createElement("div");
+      bar.id = "editor-bar";
+      bar.style.cssText = "display:none;position:fixed;bottom:0;left:0;right:0;background:#222;color:#fff;padding:10px 16px;z-index:300;font-family:monospace;font-size:13px;gap:12px;align-items:center;flex-wrap:wrap;";
+      bar.innerHTML = `
+        <span style="color:#C8963E;font-weight:bold;">EDITOR MODE</span>
+        <span id="editor-coords">Kéo vật phẩm để chỉnh vị trí</span>
+        <button id="editor-export" style="margin-left:auto;background:#C8963E;color:#1a0f08;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-family:monospace;">Export tọa độ</button>
+      `;
+      document.body.appendChild(bar);
+
+      document.getElementById("editor-export").addEventListener("click", exportPositions);
+    });
+
+    // Drag logic
+    document.addEventListener("mousedown", (e) => {
+      if (!editorMode) return;
+      const el = e.target.closest(".artifact, .decor");
+      if (!el) return;
+      e.preventDefault();
+      dragTarget = el;
+      dragTarget.style.cursor = "grabbing";
+      dragTarget.style.zIndex = 999;
+      const scene = document.getElementById("scene");
+      const rect = scene.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      dragOffsetX = e.clientX - elRect.left;
+      dragOffsetY = e.clientY - elRect.top;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!dragTarget) return;
+      e.preventDefault();
+      const scene = document.getElementById("scene");
+      const rect = scene.getBoundingClientRect();
+      const x = ((e.clientX - rect.left - dragOffsetX) / rect.width * 100);
+      const y = ((e.clientY - rect.top - dragOffsetY) / rect.height * 100);
+      dragTarget.style.left = x + "%";
+      dragTarget.style.top = y + "%";
+      const id = dragTarget.dataset.id || "decor";
+      document.getElementById("editor-coords").textContent =
+        `${id}: x=${x.toFixed(1)}, y=${y.toFixed(1)}`;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (dragTarget) {
+        dragTarget.style.cursor = "grab";
+        dragTarget.style.zIndex = "";
+        dragTarget = null;
+      }
+    });
+
+    function exportPositions() {
+      const scene = document.getElementById("scene");
+      const rect = scene.getBoundingClientRect();
+      let output = "// === ARTIFACT POSITIONS ===\n";
+      document.querySelectorAll(".artifact").forEach(el => {
+        const id = el.dataset.id;
+        const x = parseFloat(el.style.left);
+        const y = parseFloat(el.style.top);
+        const w = (el.getBoundingClientRect().width / rect.width * 100);
+        output += `${id}: x: ${x.toFixed(1)}, y: ${y.toFixed(1)}, w: ${w.toFixed(1)}\n`;
+      });
+      output += "\n// === DECOR POSITIONS ===\n";
+      document.querySelectorAll(".decor").forEach((el, i) => {
+        const x = parseFloat(el.style.left);
+        const y = parseFloat(el.style.top);
+        const w = (el.getBoundingClientRect().width / rect.width * 100);
+        output += `decor-${i}: x: ${x.toFixed(1)}, y: ${y.toFixed(1)}, w: ${w.toFixed(1)}\n`;
+      });
+      // Copy to clipboard
+      navigator.clipboard.writeText(output).then(() => {
+        alert("Đã copy tọa độ vào clipboard!\n\n" + output);
+      }).catch(() => {
+        // Fallback
+        prompt("Copy tọa độ bên dưới:", output);
+      });
+    }
   </script>
 </body>
 </html>
