@@ -585,11 +585,16 @@
         `;
         el.addEventListener("mouseenter", () => {
           if (panelOpen || isDragging) return;
-          gsap.to(el, { y: -3, scale: 1.04, duration: 0.2, ease: "back.out(2)" });
+          el.dataset.hovering = "1";
+          const s = parseFloat(el.dataset.editorScale || 100) / 100;
+          const r = parseFloat(el.dataset.rotate || 0);
+          const f = el.dataset.flip === "1" ? -1 : 1;
+          el.style.transform = `rotate(${r}deg) scale(${s * f * 1.06}, ${s * 1.06}) translateY(-3px)`;
         });
         el.addEventListener("mouseleave", () => {
+          el.dataset.hovering = "0";
           if (isDragging) return;
-          gsap.to(el, { y: 0, scale: 1, duration: 0.2, ease: "power2.out" });
+          applyTransform(el);
         });
         el.addEventListener("dblclick", (e) => {
           e.stopPropagation();
@@ -670,10 +675,13 @@
         el.classList.add("discovered");
         if (discoveredCount === 13) setTimeout(showCompletion, 1500);
       }
+      const baseS = parseFloat(el.dataset.editorScale || 100) / 100;
+      const baseR = parseFloat(el.dataset.rotate || 0);
+      const baseF = el.dataset.flip === "1" ? -1 : 1;
       gsap.timeline()
-        .to(el, { scale: 1.12, duration: 0.1, ease: "power2.out" })
-        .to(el, { scale: 0.93, duration: 0.1 })
-        .to(el, { scale: 1.0, y: 0, duration: 0.1 });
+        .to(el, { scale: baseS * 1.12, duration: 0.1, ease: "power2.out" })
+        .to(el, { scale: baseS * 0.93, duration: 0.1 })
+        .to(el, { scale: baseS, duration: 0.1, onComplete: () => applyTransform(el) });
       if (artifact.specialEffect) {
         el.classList.add("fx-" + artifact.specialEffect);
         setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 1000);
@@ -890,7 +898,10 @@
           setTimeout(() => {
             isDragging = false;
             // Show toolbar after drag ends
-            if (selectedEl && selectedEl === wasSelected) showToolbar(selectedEl);
+            if (selectedEl && selectedEl === wasSelected) {
+              applyTransform(selectedEl);
+              showToolbar(selectedEl);
+            }
           }, 50);
         }
       });
