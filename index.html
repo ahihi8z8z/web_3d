@@ -14,7 +14,6 @@
       --gold: #C8963E;
       --indigo: #2D3A6B;
       --glow: rgba(200,150,62,0.35);
-      --panel-border: #C8963E;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,27 +38,23 @@
       z-index: 50;
       backdrop-filter: blur(8px);
     }
-
     #site-header h1 {
       font-family: 'Playfair Display', serif;
       font-size: 1.4rem;
       color: var(--gold);
       letter-spacing: 0.04em;
     }
-
     #counter {
       font-family: 'Lora', serif;
       font-size: 0.95rem;
       color: var(--surface);
       opacity: 0.85;
     }
-
     #found-count {
       font-weight: 700;
       color: var(--gold);
       font-size: 1.1rem;
     }
-
     #sound-toggle {
       background: rgba(200,150,62,0.15);
       border: 1px solid rgba(200,150,62,0.3);
@@ -90,7 +85,6 @@
       padding: 40px;
       backdrop-filter: blur(12px);
     }
-
     #intro-overlay h2 {
       font-family: 'Playfair Display', serif;
       font-size: 2rem;
@@ -98,7 +92,6 @@
       margin-bottom: 20px;
       line-height: 1.4;
     }
-
     #intro-overlay p {
       font-family: 'Lora', serif;
       color: var(--surface);
@@ -108,7 +101,6 @@
       margin-bottom: 32px;
       opacity: 0.85;
     }
-
     #intro-overlay .intro-quote {
       font-style: italic;
       color: var(--gold);
@@ -118,7 +110,6 @@
       margin-bottom: 28px;
       line-height: 1.6;
     }
-
     #start-btn {
       font-family: 'Playfair Display', serif;
       font-size: 1.1rem;
@@ -143,8 +134,8 @@
       display: flex;
       justify-content: center;
       min-height: 100vh;
+      align-items: flex-start;
     }
-
     #scene {
       position: relative;
       width: 100%;
@@ -152,130 +143,167 @@
       overflow: hidden;
       border-radius: 8px;
     }
-
     #room-bg {
       width: 100%;
       height: auto;
       display: block;
     }
 
-    /* ===== HOTSPOTS ===== */
-    .hotspot {
+    /* ===== SCENE DIM ===== */
+    #scene-dim {
       position: absolute;
-      width: 48px;
-      height: 48px;
-      transform: translate(-50%, -50%);
+      inset: 0;
+      background: rgba(0,0,0,0);
+      pointer-events: none;
+      z-index: 5;
+      transition: background 0.3s;
+    }
+    #scene-dim.active {
+      background: rgba(0,0,0,0.35);
+    }
+
+    /* ===== ARTIFACT (clickable item on room) ===== */
+    .artifact {
+      position: absolute;
       cursor: pointer;
       z-index: 10;
+      transition: filter 0.3s;
+      /* transform origin at bottom center for natural scaling */
+      transform-origin: bottom center;
+    }
+    .artifact img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
     }
 
-    .hotspot-dot {
-      width: 16px;
-      height: 16px;
-      background: var(--gold);
-      border-radius: 50%;
+    /* Gold glow indicator for undiscovered */
+    .artifact::after {
+      content: '';
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 12px var(--glow);
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    .hotspot-ring {
-      width: 48px;
-      height: 48px;
-      border: 2px solid var(--gold);
-      border-radius: 50%;
-      position: absolute;
-      opacity: 0.6;
-      animation: pulse-ring 2s ease-out infinite;
-    }
-
-    @keyframes pulse-ring {
-      0%   { transform: scale(0.8); opacity: 0.6; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
-
-    .hotspot-label {
-      position: absolute;
-      bottom: -22px;
+      bottom: -4px;
       left: 50%;
       transform: translateX(-50%);
-      font-family: 'Lora', serif;
-      font-size: 0.65rem;
+      width: 60%;
+      height: 8px;
+      background: radial-gradient(ellipse, var(--glow) 0%, transparent 70%);
+      animation: glow-pulse 2s ease-in-out infinite;
+      border-radius: 50%;
+    }
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.3); }
+    }
+
+    /* Pulsing ring indicator */
+    .artifact .artifact-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 80%;
+      height: 80%;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+      animation: artifact-ring-pulse 2.5s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes artifact-ring-pulse {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+    }
+
+    .artifact.discovered::after {
+      animation: none;
+      opacity: 0;
+    }
+    .artifact.discovered .artifact-ring {
+      animation: none;
+      opacity: 0;
+    }
+    .artifact.discovered img {
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)) brightness(0.7) saturate(0.4);
+    }
+
+    /* Artifact label */
+    .artifact-label {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Playfair Display', serif;
+      font-size: 0.7rem;
       color: var(--gold);
       white-space: nowrap;
       opacity: 0;
       transition: opacity 0.3s;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.5);
       pointer-events: none;
+      font-weight: 600;
     }
-
-    .hotspot:hover .hotspot-label {
+    .artifact:hover .artifact-label {
       opacity: 1;
     }
 
-    .hotspot.discovered .hotspot-dot {
-      background: #888;
-      box-shadow: none;
+    /* ===== DECOR (non-clickable) ===== */
+    .decor {
+      position: absolute;
+      pointer-events: none;
+      z-index: 8;
     }
-    .hotspot.discovered .hotspot-ring {
-      animation: none;
-      opacity: 0;
-    }
-    .hotspot.discovered .hotspot-label {
-      color: #888;
+    .decor img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.3));
     }
 
     /* ===== SPECIAL EFFECTS ===== */
-    .hotspot.fx-flame-burst .hotspot-dot {
-      background: #ff6a00;
-      box-shadow: 0 0 20px rgba(255,106,0,0.6), 0 0 40px rgba(255,60,0,0.3);
+    .artifact.fx-flame-burst img {
+      filter: drop-shadow(0 0 15px rgba(255,100,0,0.7)) drop-shadow(0 0 30px rgba(255,60,0,0.4)) brightness(1.2);
     }
-    .hotspot.fx-ripple::after {
+    .artifact.fx-ripple::before {
       content: '';
       position: absolute;
       top: 50%; left: 50%;
-      width: 60px; height: 60px;
+      width: 120%; height: 120%;
       border: 2px solid var(--gold);
       border-radius: 50%;
       transform: translate(-50%, -50%) scale(0);
-      animation: ripple-out 0.6s ease-out forwards;
+      animation: ripple-out 0.8s ease-out forwards;
+      pointer-events: none;
     }
     @keyframes ripple-out {
-      to { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
     }
-    .hotspot.fx-pattern-glow .hotspot-dot {
-      background: linear-gradient(135deg, #ff4444, #ffaa00, #44ff44, #4444ff, #ff44ff);
-      background-size: 300% 300%;
-      animation: rainbow-shift 1s linear infinite;
+    .artifact.fx-pattern-glow img {
+      filter: drop-shadow(0 0 12px rgba(255,100,200,0.5)) drop-shadow(0 0 20px rgba(100,200,255,0.3)) brightness(1.15);
     }
-    @keyframes rainbow-shift {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+    .artifact.fx-sparkle img {
+      filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(3px -3px 6px var(--gold)) drop-shadow(-3px -3px 6px var(--gold)) brightness(1.2);
     }
-    .hotspot.fx-sparkle .hotspot-dot {
-      box-shadow: 0 0 8px var(--gold), 4px -4px 6px var(--gold), -4px -4px 6px var(--gold);
-    }
-    .hotspot.fx-sway {
-      animation: sway-anim 0.4s ease-in-out;
+    .artifact.fx-sway {
+      animation: sway-anim 0.5s ease-in-out;
     }
     @keyframes sway-anim {
-      0% { transform: translate(-50%, -50%) translateX(0); }
-      25% { transform: translate(-50%, -50%) translateX(-5px); }
-      75% { transform: translate(-50%, -50%) translateX(5px); }
-      100% { transform: translate(-50%, -50%) translateX(0); }
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+      100% { transform: translateX(0); }
     }
-    .hotspot.fx-smoke-puff .hotspot-dot {
-      box-shadow: 0 -8px 16px rgba(180,170,160,0.4), 0 0 12px var(--glow);
+    .artifact.fx-smoke-puff img {
+      filter: drop-shadow(0 -10px 20px rgba(180,170,160,0.5)) drop-shadow(2px 4px 6px rgba(0,0,0,0.4));
     }
-    .hotspot.fx-thread-weave .hotspot-ring {
-      border-style: dashed;
-      animation: spin-ring 1s linear;
+    .artifact.fx-thread-weave {
+      animation: thread-weave-anim 0.6s ease-in-out;
     }
-    @keyframes spin-ring {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    @keyframes thread-weave-anim {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-2deg); }
+      75% { transform: rotate(2deg); }
+      100% { transform: rotate(0deg); }
     }
 
     /* ===== INFO PANEL ===== */
@@ -293,13 +321,11 @@
       z-index: 100;
       opacity: 0;
     }
-
     #panel-content {
       display: flex;
       gap: 24px;
       align-items: flex-start;
     }
-
     #panel-photo-wrap {
       flex-shrink: 0;
       width: 140px; height: 140px;
@@ -308,19 +334,16 @@
       overflow: hidden;
       background: #e8dcc8;
     }
-
     #panel-photo {
       width: 100%; height: 100%;
       object-fit: cover;
     }
-
     #panel-name {
       font-family: 'Playfair Display', serif;
       font-size: 1.3rem;
       color: var(--earth);
       margin: 0 0 4px;
     }
-
     #panel-name-en {
       font-family: 'Lora', serif;
       font-size: 0.8rem;
@@ -329,7 +352,6 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
-
     #panel-desc {
       font-family: 'Lora', serif;
       font-size: 0.95rem;
@@ -337,7 +359,6 @@
       line-height: 1.65;
       margin: 0;
     }
-
     #panel-close {
       position: absolute;
       top: 16px; right: 20px;
@@ -373,33 +394,18 @@
       padding: 40px;
       backdrop-filter: blur(8px);
     }
-
     #completion-overlay h2 {
       font-family: 'Playfair Display', serif;
       font-size: 2rem;
       color: var(--gold);
       margin-bottom: 16px;
     }
-
     #completion-overlay p {
       color: var(--surface);
       font-size: 1rem;
       opacity: 0.8;
       max-width: 500px;
       line-height: 1.6;
-    }
-
-    /* ===== SCENE OVERLAY (dim) ===== */
-    #scene-dim {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0);
-      pointer-events: none;
-      z-index: 5;
-      transition: background 0.3s;
-    }
-    #scene-dim.active {
-      background: rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -409,12 +415,12 @@
   <div id="intro-overlay">
     <h2>Ngoi Nha Lo Lo Chai</h2>
     <p class="intro-quote">
-      "Buoc vao ngoi nha da cua nguoi Lo Lo Chai -- noi ngon lua bep khong bao gio tat,
+      "Buoc vao ngoi nha da cua nguoi Lo Lo Chai — noi ngon lua bep khong bao gio tat,
       tieng khung cui van vang, va moi tam vai theu om tron ban sac tram nam.
       Chin vat pham, chin manh hon dan toc dang cho ban kham pha."
     </p>
     <p>
-      Chao mung ban den voi ngoi nha cua nguoi Lo Lo Chai -- noi dia dau cuc Bac To quoc,
+      Chao mung ban den voi ngoi nha cua nguoi Lo Lo Chai — noi dia dau cuc Bac To quoc,
       duoi chan cot co Lung Cu, Ha Giang. Cung kham pha nhung cau chuyen van hoa
       duoc ke qua vat pham truyen thong cua con nguoi noi day.
     </p>
@@ -436,7 +442,7 @@
     <div id="scene">
       <img id="room-bg" src="assets/scene/room-bg.png" alt="Lo Lo Chai Room" />
       <div id="scene-dim"></div>
-      <!-- Hotspots will be injected here by JS -->
+      <!-- Artifacts and decor injected by JS -->
     </div>
   </div>
 
@@ -459,7 +465,7 @@
   <div id="completion-overlay">
     <h2>Ban da kham pha tat ca 9 vat pham!</h2>
     <p>
-      Moi vat pham la mot manh ghep cua van hoa Lo Lo Chai --
+      Moi vat pham la mot manh ghep cua van hoa Lo Lo Chai —
       tu ngon lua bep am cung den tieng trong dong vang vong.
       Cam on ban da dong hanh tren hanh trinh nay.
     </p>
@@ -467,6 +473,10 @@
 
   <script>
     // ===== ARTIFACT DATA =====
+    // Positions calibrated to Khung nhà 3D.PNG isometric room
+    // Room floor area: roughly x:15-85%, y:55-90%
+    // Left wall: x:5-48%, y:18-55%
+    // Right wall: x:48-92%, y:18-55%
     const ARTIFACTS = [
       {
         id: "bep-lua",
@@ -474,7 +484,9 @@
         nameEn: "Sacred Fireplace",
         description: "Bep lua la trung tam cua khong gian sinh hoat trong ngoi nha truyen thong, noi gan voi viec nau an, suoi am va quay quan gia dinh. Ngon lua chua bao gio tat. Day la chi tiet quan trong giup toan bo goc nha co hon va co hoi tho doi song.",
         photo: "assets/artifacts/01-bep-lua.png",
-        x: 28, y: 78,
+        sprite: "assets/artifacts/01-bep-lua-3d.png",
+        // "góc dưới bên trái sàn nhà"
+        x: 22, y: 74, w: 14, h: 12,
         sound: "fire",
         specialEffect: "flame-burst"
       },
@@ -484,7 +496,9 @@
         nameEn: "Bronze Pot",
         description: "Noi dong la vat dung quen thuoc trong gian bep truyen thong, goi cam giac doi song gia dinh moc mac va gian di. Khi dat tren bep lua, noi dong giup canh vat tro nen sinh dong va tu nhien hon.",
         photo: "assets/artifacts/02-noi-dong.png",
-        x: 22, y: 70,
+        sprite: "assets/artifacts/02-noi-dong-3d.png",
+        // "ngay trên bếp lửa, góc dưới bên trái"
+        x: 20, y: 67, w: 8, h: 8,
         sound: null,
         specialEffect: "smoke-puff"
       },
@@ -494,7 +508,9 @@
         nameEn: "Bamboo Basket",
         description: "Gui tre la vat dung quen thuoc trong doi song cua nguoi dan vung cao, thuong dung de mang do, dung nong san hoac vat dung hang ngay. Dua gui vao mo hinh se giup goc nha them tu nhien va giau ban sac dia phuong.",
         photo: "assets/artifacts/03-gui-tre.png",
-        x: 38, y: 82,
+        sprite: "assets/artifacts/03-gui-tre-3d.png",
+        // "cạnh bên phải bếp lửa, lệch sang phải một chút"
+        x: 34, y: 73, w: 7, h: 10,
         sound: null,
         specialEffect: "sway"
       },
@@ -504,7 +520,9 @@
         nameEn: "Bronze Drum",
         description: "Trong dong la bieu tuong van hoa dac trung, gan voi doi song tinh than va ban sac cua cong dong Lo Lo. Tieng trong vang len moi dip le hoi. Du duoc cach dieu theo phong cach chibi, vat pham nay van can giu net trang trong va noi bat.",
         photo: "assets/artifacts/04-trong-dong.png",
-        x: 15, y: 75,
+        sprite: "assets/artifacts/04-trong-dong-3d.png",
+        // "gần cụm bếp, phía ngoài chếch về bên trái"
+        x: 14, y: 81, w: 9, h: 8,
         sound: "drum",
         specialEffect: "ripple"
       },
@@ -514,7 +532,9 @@
         nameEn: "Traditional Costume",
         description: "Vay ao Lo Lo la trang phuc truyen thong dac trung nhat cua phu nu dan toc Lo Lo Chai, duoc may thu cong tu vai tho cam voi hoa van theu tay tinh xao, mau sac ruc ro mang dam ban sac van hoa mien nui.",
         photo: "assets/artifacts/05-vay-ao.png",
-        x: 80, y: 42,
+        sprite: "assets/artifacts/05-vay-ao-3d.png",
+        // "treo trên móc gỗ ngay trên tường phải"
+        x: 76, y: 30, w: 9, h: 16,
         sound: null,
         specialEffect: "pattern-glow"
       },
@@ -524,7 +544,9 @@
         nameEn: "Weaving Loom",
         description: "Khung cui det vai la dung cu truyen thong quan trong nhat trong van hoa nguoi Lo Lo Chai. Moi tam vai det ra deu gan lien voi trang phuc va le hoi. Khung cui mang den hoi tho hoai co, am ap cua cuoc song mien nui.",
         photo: "assets/artifacts/06-khung-cui.png",
-        x: 72, y: 72,
+        sprite: "assets/artifacts/06-khung-cui-3d.png",
+        // "góc dưới phải, kế tường phải"
+        x: 68, y: 68, w: 14, h: 12,
         sound: null,
         specialEffect: "thread-weave"
       },
@@ -532,9 +554,11 @@
         id: "mu-trang-suc",
         name: "Mu & Trang Suc",
         nameEn: "Hat & Silver Jewelry",
-        description: "Mu truyen thong va trang suc bac la 'bau vat' khong the thieu cua phu nu Lo Lo -- vong co to ban, khuyen tai dai, lac tay che tac thu cong tinh xao. Khi dat tren ke trong ngoi nha Lo Lo, bo trang suc bac toat len ve dep hoai co, lap lanh.",
+        description: "Mu truyen thong va trang suc bac la 'bau vat' khong the thieu cua phu nu Lo Lo — vong co to ban, khuyen tai dai, lac tay che tac thu cong tinh xao. Khi dat tren ke trong ngoi nha Lo Lo, bo trang suc bac toat len ve dep hoai co, lap lanh.",
         photo: "assets/artifacts/07-mu.png",
-        x: 85, y: 35,
+        sprite: "assets/artifacts/07-mu-3d.png",
+        // "trên tường phải, trên kệ gỗ"
+        x: 84, y: 32, w: 8, h: 12,
         sound: null,
         specialEffect: "sparkle"
       },
@@ -543,8 +567,10 @@
         name: "Phan Go",
         nameEn: "Wooden Platform Bed",
         description: "Phan go thap la noi ngoi nghi va sum vay gian di nhung tran day hoi am cua gia dinh nguoi Lo Lo Chai sau ngay lam nuong ray. Chiec phan go thap sat san giup giu am vao mua dong gia ret vung cao.",
-        photo: "assets/artifacts/08-phan-go.png",
-        x: 50, y: 65,
+        photo: "assets/artifacts/08-phan-go.jpg",
+        sprite: "assets/artifacts/08-phan-go-3d.png",
+        // "khu trung tâm sàn, hơi lùi về phía trong"
+        x: 46, y: 62, w: 16, h: 10,
         sound: null,
         specialEffect: "sway"
       },
@@ -553,11 +579,22 @@
         name: "Mam Go",
         nameEn: "Wooden Tray",
         description: "Mam go la vat dung quen thuoc trong bua an gia dinh nguoi Lo Lo Chai, noi moi nguoi quay quan ben mam com dan da. No tuong trung cho su doan ket, chia se va hieu khach cua cong dong.",
-        photo: "assets/artifacts/09-mam-go.png",
-        x: 55, y: 75,
+        photo: "assets/artifacts/09-mam-go.jpg",
+        sprite: "assets/artifacts/09-mam-go-3d.png",
+        // "trước phản gỗ, khu trung tâm"
+        x: 50, y: 74, w: 10, h: 7,
         sound: null,
         specialEffect: null
       }
+    ];
+
+    // Decorative items (non-clickable)
+    const DECOR = [
+      { src: "assets/decor/goi.png", x: 48, y: 57, w: 8, h: 6 },         // gối trên phản gỗ
+      { src: "assets/decor/den-dau.png", x: 56, y: 70, w: 5, h: 6 },     // đèn dầu cạnh mâm
+      { src: "assets/decor/chum-ngo.png", x: 30, y: 42, w: 8, h: 10 },   // chùm ngô treo tường trái
+      { src: "assets/decor/thung-ro.png", x: 78, y: 72, w: 8, h: 8 },    // thúng rổ cạnh khung cửi
+      { src: "assets/decor/chum-ruou.png", x: 38, y: 66, w: 6, h: 8 },   // chum rượu ngô
     ];
 
     // ===== STATE =====
@@ -569,7 +606,8 @@
     // ===== INIT =====
     window.addEventListener("DOMContentLoaded", () => {
       initIntro();
-      initHotspots();
+      initDecor();
+      initArtifacts();
       initPanelClose();
       initSoundToggle();
     });
@@ -577,47 +615,58 @@
     // ===== INTRO =====
     function initIntro() {
       const overlay = document.getElementById("intro-overlay");
-      const btn = document.getElementById("start-btn");
-      btn.addEventListener("click", () => {
+      document.getElementById("start-btn").addEventListener("click", () => {
         gsap.to(overlay, {
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
+          opacity: 0, duration: 0.5, ease: "power2.in",
           onComplete: () => { overlay.style.display = "none"; }
         });
       });
     }
 
-    // ===== HOTSPOTS =====
-    function initHotspots() {
+    // ===== DECOR =====
+    function initDecor() {
+      const scene = document.getElementById("scene");
+      DECOR.forEach(d => {
+        const el = document.createElement("div");
+        el.className = "decor";
+        el.style.cssText = `left:${d.x}%;top:${d.y}%;width:${d.w}%;height:auto;`;
+        el.innerHTML = `<img src="${d.src}" alt="decor" style="width:100%;height:auto;" />`;
+        scene.appendChild(el);
+      });
+    }
+
+    // ===== ARTIFACTS =====
+    function initArtifacts() {
       const scene = document.getElementById("scene");
       ARTIFACTS.forEach(artifact => {
         const el = document.createElement("div");
-        el.className = "hotspot";
+        el.className = "artifact";
         el.dataset.id = artifact.id;
-        el.style.left = artifact.x + "%";
-        el.style.top = artifact.y + "%";
+        el.style.cssText = `left:${artifact.x}%;top:${artifact.y}%;width:${artifact.w}%;`;
         el.innerHTML = `
-          <div class="hotspot-ring"></div>
-          <div class="hotspot-dot"></div>
-          <span class="hotspot-label">${artifact.name}</span>
+          <img src="${artifact.sprite}" alt="${artifact.name}" />
+          <div class="artifact-ring"></div>
+          <span class="artifact-label">${artifact.name}</span>
         `;
 
-        // Hover
+        // Hover — chibi bounce
         el.addEventListener("mouseenter", () => {
           if (panelOpen) return;
-          gsap.to(el.querySelector(".hotspot-dot"), {
-            scale: 1.4, duration: 0.3, ease: "back.out(2)"
+          gsap.to(el, {
+            y: -6, scale: 1.08, duration: 0.3, ease: "back.out(2)"
           });
         });
         el.addEventListener("mouseleave", () => {
-          gsap.to(el.querySelector(".hotspot-dot"), {
-            scale: 1, duration: 0.3, ease: "power2.out"
+          gsap.to(el, {
+            y: 0, scale: 1, duration: 0.3, ease: "power2.out"
           });
         });
 
         // Click
-        el.addEventListener("click", () => onArtifactClick(artifact, el));
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          onArtifactClick(artifact, el);
+        });
         scene.appendChild(el);
       });
     }
@@ -632,62 +681,54 @@
         discoveredCount++;
         document.getElementById("found-count").textContent = discoveredCount;
         el.classList.add("discovered");
-
-        // Check completion
         if (discoveredCount === 9) {
           setTimeout(showCompletion, 1500);
         }
       }
 
       // Phase 1: bounce
-      const tl1 = gsap.timeline();
-      tl1.to(el, { scale: 1.3, duration: 0.1, ease: "power2.out" })
-         .to(el, { scale: 0.9, duration: 0.1 })
-         .to(el, { scale: 1.0, duration: 0.1 });
+      gsap.timeline()
+        .to(el, { scale: 1.2, duration: 0.1, ease: "power2.out" })
+        .to(el, { scale: 0.9, duration: 0.1 })
+        .to(el, { scale: 1.0, y: 0, duration: 0.15 });
 
       // Special effect
       if (artifact.specialEffect) {
         el.classList.add("fx-" + artifact.specialEffect);
-        setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 800);
+        setTimeout(() => el.classList.remove("fx-" + artifact.specialEffect), 1000);
       }
 
-      // Dim others
-      document.querySelectorAll(".hotspot").forEach(h => {
-        if (h !== el) gsap.to(h, { opacity: 0.3, duration: 0.3 });
+      // Dim others + decor
+      document.querySelectorAll(".artifact").forEach(h => {
+        if (h !== el) gsap.to(h, { opacity: 0.25, duration: 0.3 });
+      });
+      document.querySelectorAll(".decor").forEach(d => {
+        gsap.to(d, { opacity: 0.25, duration: 0.3 });
       });
       document.getElementById("scene-dim").classList.add("active");
 
-      // Sound stub
-      if (artifact.sound) {
-        console.log("sound:", artifact.sound);
-      }
+      // Spotlight on clicked artifact
+      gsap.to(el, { zIndex: 20, duration: 0 });
 
-      // Open panel
+      // Sound stub
+      if (artifact.sound) console.log("sound:", artifact.sound);
+
       openPanel(artifact);
     }
 
     // ===== PANEL =====
     function openPanel(artifact) {
       panelOpen = true;
-      const panel = document.getElementById("info-panel");
-      const photo = document.getElementById("panel-photo");
-      const name = document.getElementById("panel-name");
-      const nameEn = document.getElementById("panel-name-en");
-      const desc = document.getElementById("panel-desc");
+      document.getElementById("panel-photo").src = artifact.photo;
+      document.getElementById("panel-photo").alt = artifact.name;
+      document.getElementById("panel-name").textContent = artifact.name;
+      document.getElementById("panel-name-en").textContent = artifact.nameEn;
+      document.getElementById("panel-desc").textContent = artifact.description;
 
-      photo.src = artifact.photo;
-      photo.alt = artifact.name;
-      name.textContent = artifact.name;
-      nameEn.textContent = artifact.nameEn;
-      desc.textContent = artifact.description;
-
-      // Animate panel up
-      gsap.fromTo(panel,
+      gsap.fromTo("#info-panel",
         { y: "100%", opacity: 0 },
         { y: "0%", opacity: 1, duration: 0.35, ease: "power3.out", delay: 0.2 }
       );
-
-      // Animate content in
       const tl = gsap.timeline({ delay: 0.5 });
       tl.fromTo("#panel-photo", { opacity: 0 }, { opacity: 1, duration: 0.2 })
         .fromTo("#panel-name", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.2 })
@@ -700,8 +741,11 @@
         y: "100%", opacity: 0, duration: 0.3, ease: "power2.in",
         onComplete: () => {
           panelOpen = false;
-          document.querySelectorAll(".hotspot").forEach(h => {
-            gsap.to(h, { opacity: 1, duration: 0.3 });
+          document.querySelectorAll(".artifact").forEach(h => {
+            gsap.to(h, { opacity: 1, zIndex: 10, duration: 0.3 });
+          });
+          document.querySelectorAll(".decor").forEach(d => {
+            gsap.to(d, { opacity: 1, duration: 0.3 });
           });
           document.getElementById("scene-dim").classList.remove("active");
         }
@@ -710,15 +754,11 @@
 
     function initPanelClose() {
       document.getElementById("panel-close").addEventListener("click", closePanel);
-      // Click outside panel to close
       document.addEventListener("click", (e) => {
         if (!panelOpen) return;
         const panel = document.getElementById("info-panel");
-        if (!panel.contains(e.target) && !e.target.closest(".hotspot")) {
-          closePanel();
-        }
+        if (!panel.contains(e.target) && !e.target.closest(".artifact")) closePanel();
       });
-      // Escape key
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && panelOpen) closePanel();
       });
@@ -730,7 +770,6 @@
       btn.addEventListener("click", () => {
         soundOn = !soundOn;
         btn.innerHTML = soundOn ? "&#x1f50a; Sound On" : "&#x1f507; Sound Off";
-        console.log("Sound toggled:", soundOn);
       });
     }
 
@@ -738,10 +777,7 @@
     function showCompletion() {
       const overlay = document.getElementById("completion-overlay");
       overlay.style.display = "flex";
-      gsap.fromTo(overlay,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.6, ease: "power2.out" }
-      );
+      gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" });
     }
   </script>
 </body>
