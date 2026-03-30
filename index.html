@@ -260,6 +260,19 @@
     }
     .decor:active { cursor: grabbing; }
 
+    /* ===== STRUCTURE ZONES (clickable areas on room) ===== */
+    .structure-zone {
+      position: absolute;
+      cursor: pointer;
+      z-index: 3;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .structure-zone:hover {
+      background: rgba(200,150,62,0.1);
+      outline: 1px dashed rgba(200,150,62,0.3);
+    }
+
     /* ===== SPECIAL EFFECTS ===== */
     .artifact.fx-flame-burst img {
       filter: drop-shadow(0 0 15px rgba(255,100,0,0.7)) drop-shadow(0 0 30px rgba(255,60,0,0.4)) brightness(1.2);
@@ -380,7 +393,7 @@
     <h1>Ngôi Nhà Lô Lô Chải</h1>
     <div id="counter">
       <span id="found-count">0</span>
-      <span> / 9 vật phẩm</span>
+      <span> / 13 vật phẩm</span>
     </div>
   </header>
 
@@ -419,7 +432,7 @@
   </div>
 
   <div id="completion-overlay">
-    <h2>Bạn đã khám phá tất cả 9 vật phẩm!</h2>
+    <h2>Bạn đã khám phá tất cả 13 vật phẩm!</h2>
     <p>Mỗi vật phẩm là một mảnh ghép của văn hóa Lô Lô Chải — từ ngọn lửa bếp ấm cúng đến tiếng trống đồng vang vọng.</p>
   </div>
 
@@ -460,7 +473,38 @@
       { id:"mam-go", name:"Mâm Gỗ", nameEn:"Wooden Tray",
         description:"Mâm gỗ là vật dụng quen thuộc trong bữa ăn gia đình người Lô Lô Chải, nơi mọi người quây quần bên mâm cơm dân dã. Nó tượng trưng cho sự đoàn kết, chia sẻ và hiếu khách của cộng đồng. Chiếc mâm gỗ mộc mạc góp phần tạo nên không khí ấm cúng, gần gũi của ngôi nhà truyền thống vùng cao.",
         photo:"assets/artifacts/09-mam-go.jpg", sprite:"assets/artifacts/09-mam-go-3d.png",
+        sound:null, specialEffect:null },
+      { id:"banh-tam-giac-mach", name:"Bánh Tam Giác Mạch", nameEn:"Buckwheat Cake",
+        description:"Bánh tam giác mạch là món ăn đặc trưng của vùng cao nguyên đá Hà Giang, được làm từ hoa tam giác mạch — loài hoa tím hồng nở rộ mỗi độ thu về. Bánh có vị bùi nhẹ, thơm mộc mạc, thường được nướng trên bếp than hồng. Đây không chỉ là món ăn mà còn là biểu tượng văn hóa ẩm thực của người Lô Lô Chải.",
+        photo:"assets/artifacts/10-banh-tam-giac-mach.png", sprite:"assets/artifacts/10-banh-tam-giac-mach-3d.png",
+        sound:null, specialEffect:null },
+      { id:"chum-ruou-ngo", name:"Chum Rượu Ngô", nameEn:"Corn Wine Jar",
+        description:"Chum rượu ngô men lá là thức uống truyền thống không thể thiếu trong đời sống người Lô Lô Chải. Rượu được nấu từ ngô nương, ủ với men lá rừng trong những chiếc chum sành, tạo nên vị ngọt dịu, thơm nồng đặc trưng. Mỗi chum rượu là sự kết tinh của thiên nhiên và bàn tay khéo léo.",
+        photo:"assets/artifacts/11-chum-ruou.jpg", sprite:"assets/artifacts/11-chum-ruou-3d.png",
+        sound:null, specialEffect:null },
+      { id:"men-men", name:"Mèn Mén", nameEn:"Steamed Corn Cake",
+        description:"Mèn mén là món ăn chính hàng ngày của người Lô Lô Chải, được làm từ bột ngô xay nhuyễn, đồ hai lần cho chín đều. Món ăn giản dị nhưng chứa đựng cả một nền văn hóa ẩm thực vùng cao — nơi ngô là cây lương thực chủ đạo, nuôi sống bao thế hệ trên cao nguyên đá.",
+        photo:"assets/artifacts/12-men-men.jpg", sprite:"assets/artifacts/12-men-men-3d.png",
         sound:null, specialEffect:null }
+    ];
+
+    // Structural elements - clickable on room but NOT draggable
+    const STRUCTURES = [
+      { id:"mai-nha", name:"Mái Nhà", nameEn:"Roof",
+        description:"Mái nhà người Lô Lô lợp bằng ngói máng âm dương — những viên ngói đất nung xếp úp-ngửa xen kẽ nhau, tạo thành lớp mái cong mượt mà màu xanh xám. Bên dưới mái lộ rõ hệ xà gỗ Sa mộc nâu sẫm đỡ mái — những thanh gỗ tròn thô ráp giao nhau ở góc nhà.",
+        photo:"assets/artifacts/01-bep-lua.png",
+        // Click zone: top area of room (roof)
+        x: 10, y: 2, w: 82, h: 22 },
+      { id:"tuong-nha", name:"Tường Nhà", nameEn:"Wall",
+        description:"Tường nhà được làm theo kỹ thuật \"trình tường\" — đất thịt được đầm chặt từng lớp vào khuôn gỗ. Những bức tường này đã đứng vững vàng hàng trăm năm trên Cao nguyên đá Đồng Văn. Màu vàng nâu đất ấm áp bao phủ toàn bộ, phần trên tường có hệ xà gỗ chia ô tạo khung trang trí tự nhiên.",
+        photo:"assets/artifacts/01-bep-lua.png",
+        // Click zone: walls area
+        x: 5, y: 22, w: 90, h: 35 },
+      { id:"hang-rao-da", name:"Hàng Rào Đá", nameEn:"Stone Fence",
+        description:"Những phiến đá tai mèo từ núi, xếp chồng lên nhau theo kinh nghiệm cha truyền con nối. Hàng rào đá không chỉ để phân ranh giới hay ngăn gia súc — theo người Lô Lô, nó còn là tấm khiên che chở gia đình khỏi gió núi và thú dữ.",
+        photo:"assets/artifacts/01-bep-lua.png",
+        // Click zone: stone base perimeter
+        x: 3, y: 82, w: 94, h: 16 }
     ];
 
     const DECOR = [
@@ -468,7 +512,6 @@
       { id:"den-dau", name:"Đèn Dầu", src:"assets/decor/den-dau.png" },
       { id:"chum-ngo", name:"Chùm Ngô", src:"assets/decor/chum-ngo.png" },
       { id:"thung-ro", name:"Thúng Rổ", src:"assets/decor/thung-ro.png" },
-      { id:"chum-ruou", name:"Chum Rượu", src:"assets/decor/chum-ruou.png" },
     ];
 
     const ITEM_SIZE = 14; // uniform width % when placed on scene
@@ -563,6 +606,20 @@
         el.innerHTML = `<img src="${d.src}" alt="${d.name}" />`;
         scene.appendChild(el);
       });
+
+      // Structural clickable zones (not draggable)
+      STRUCTURES.forEach(s => {
+        const el = document.createElement("div");
+        el.className = "structure-zone";
+        el.dataset.id = s.id;
+        el.style.cssText = `left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%;`;
+        el.title = s.name;
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          onStructureClick(s);
+        });
+        scene.appendChild(el);
+      });
     }
 
     // ===== CLICK TRAY → PLACE AT CENTER =====
@@ -591,6 +648,18 @@
       selectItem(sel);
     }
 
+    // ===== STRUCTURE CLICK → INFO =====
+    function onStructureClick(structure) {
+      if (panelOpen) return;
+      if (!discovered.has(structure.id)) {
+        discovered.add(structure.id);
+        discoveredCount++;
+        document.getElementById("found-count").textContent = discoveredCount;
+        if (discoveredCount === 13) setTimeout(showCompletion, 1500);
+      }
+      openPanel(structure);
+    }
+
     // ===== DOUBLE-CLICK → INFO =====
     function onArtifactDblClick(artifact, el) {
       if (panelOpen) return;
@@ -599,7 +668,7 @@
         discoveredCount++;
         document.getElementById("found-count").textContent = discoveredCount;
         el.classList.add("discovered");
-        if (discoveredCount === 9) setTimeout(showCompletion, 1500);
+        if (discoveredCount === 13) setTimeout(showCompletion, 1500);
       }
       gsap.timeline()
         .to(el, { scale: 1.12, duration: 0.1, ease: "power2.out" })
