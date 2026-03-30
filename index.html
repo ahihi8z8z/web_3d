@@ -237,8 +237,10 @@
       transform: scale(1.05);
     }
     .tray-item.placed {
-      opacity: 0.3;
-      pointer-events: none;
+      opacity: 0.35;
+    }
+    .tray-item.placed img {
+      filter: grayscale(0.5) brightness(0.7);
     }
     .tray-item img {
       width: 60px;
@@ -736,7 +738,7 @@
         item.dataset.type = "artifact";
         item.dataset.id = a.id;
         item.innerHTML = `<img src="${a.sprite}" alt="${a.name}" /><span class="tray-item-name">${a.name}</span>`;
-        item.addEventListener("click", () => placeItemCenter(a.id, "artifact"));
+        item.addEventListener("click", () => toggleTrayItem(a.id, "artifact"));
         tray.appendChild(item);
       });
 
@@ -755,7 +757,7 @@
         item.dataset.type = "decor";
         item.dataset.id = d.id;
         item.innerHTML = `<img src="${d.src}" alt="${d.name}" /><span class="tray-item-name">${d.name}</span>`;
-        item.addEventListener("click", () => placeItemCenter(d.id, "decor"));
+        item.addEventListener("click", () => toggleTrayItem(d.id, "decor"));
         tray.appendChild(item);
       });
     }
@@ -832,6 +834,19 @@
     }
 
     // ===== CLICK TRAY → PLACE AT CENTER =====
+    function toggleTrayItem(id, type) {
+      if (placedItems.has(id)) {
+        // Recall item from scene
+        const scene = document.getElementById("scene");
+        const el = type === "artifact"
+          ? scene.querySelector(`.artifact[data-id="${id}"]`)
+          : scene.querySelector(`.decor[data-id="${id}"]`);
+        if (el) returnToTray(el);
+      } else {
+        placeItemCenter(id, type);
+      }
+    }
+
     function placeItemCenter(id, type) {
       if (placedItems.has(id)) return;
 
