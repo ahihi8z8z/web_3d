@@ -138,6 +138,21 @@
       font-family: 'Lora', serif; font-size: 0.85rem;
       color: #4a3020; line-height: 1.6; margin: 0;
     }
+    #panel-sound-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      background: rgba(200,150,62,0.12);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      color: var(--earth);
+      font-family: 'Lora', serif; font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      align-self: flex-start;
+    }
+    #panel-sound-btn:hover {
+      background: rgba(200,150,62,0.25);
+    }
 
     /* ===== SCENE ===== */
     #scene-wrapper {
@@ -462,6 +477,7 @@
         <h2 id="panel-name"></h2>
         <p id="panel-name-en"></p>
         <p id="panel-desc"></p>
+        <button id="panel-sound-btn" style="display:none"></button>
       </div>
     </div>
 
@@ -581,40 +597,52 @@
 
     // ===== SOUND SYSTEM =====
     let mainSound = null;
-    let itemSound = null;
-    let soundEnabled = false;
+    let mainSoundOn = false;
+    const itemSounds = {}; // id → { audio, playing }
 
     function initSound() {
       mainSound = new Audio("assets/sounds/main.mp3");
       mainSound.loop = true;
       mainSound.volume = 0.5;
 
+      // Main sound toggle
       document.getElementById("sound-toggle").addEventListener("click", () => {
-        soundEnabled = !soundEnabled;
+        mainSoundOn = !mainSoundOn;
         const btn = document.getElementById("sound-toggle");
-        if (soundEnabled) {
+        if (mainSoundOn) {
           mainSound.play().catch(() => {});
           btn.textContent = "\u{1F50A}";
           btn.classList.add("active");
         } else {
           mainSound.pause();
-          if (itemSound) { itemSound.pause(); itemSound = null; }
           btn.textContent = "\u{1F507}";
           btn.classList.remove("active");
         }
       });
     }
 
-    function playItemSound(src) {
-      if (!soundEnabled || !src) return;
-      if (itemSound) { itemSound.pause(); itemSound.currentTime = 0; }
-      itemSound = new Audio(src);
-      itemSound.volume = 0.6;
-      itemSound.play().catch(() => {});
+    function toggleItemSound(id, src) {
+      if (!src) return;
+      if (itemSounds[id] && itemSounds[id].playing) {
+        // Stop this item's sound
+        itemSounds[id].audio.pause();
+        itemSounds[id].playing = false;
+        return false; // now off
+      } else {
+        // Play (or resume) this item's sound
+        if (!itemSounds[id]) {
+          itemSounds[id] = { audio: new Audio(src), playing: false };
+          itemSounds[id].audio.loop = true;
+          itemSounds[id].audio.volume = 0.5;
+        }
+        itemSounds[id].audio.play().catch(() => {});
+        itemSounds[id].playing = true;
+        return true; // now on
+      }
     }
 
-    function stopItemSound() {
-      if (itemSound) { itemSound.pause(); itemSound = null; }
+    function stopAllItemSounds() {
+      Object.values(itemSounds).forEach(s => { s.audio.pause(); s.playing = false; });
     }
 
     // ===== CAPTURE & SHARE =====
@@ -878,8 +906,19 @@
       document.getElementById("panel-name").textContent = artifact.name;
       document.getElementById("panel-name-en").textContent = artifact.nameEn;
       document.getElementById("panel-desc").textContent = artifact.description;
-      // Play item sound
-      playItemSound(artifact.sound);
+      // Sound toggle button in panel
+      const soundBtn = document.getElementById("panel-sound-btn");
+      if (artifact.sound) {
+        soundBtn.style.display = "flex";
+        const isPlaying = itemSounds[artifact.id] && itemSounds[artifact.id].playing;
+        soundBtn.textContent = isPlaying ? "\u{1F50A} Tắt âm thanh" : "\u{1F3B5} Phát âm thanh";
+        soundBtn.onclick = () => {
+          const nowPlaying = toggleItemSound(artifact.id, artifact.sound);
+          soundBtn.textContent = nowPlaying ? "\u{1F50A} Tắt âm thanh" : "\u{1F3B5} Phát âm thanh";
+        };
+      } else {
+        soundBtn.style.display = "none";
+      }
       // Slide open left panel
       document.getElementById("info-panel").classList.add("open");
       const inner = document.getElementById("info-panel-inner");
@@ -889,7 +928,6 @@
     function closePanel() {
       document.getElementById("info-panel").classList.remove("open");
       panelOpen = false;
-      stopItemSound();
       document.querySelectorAll(".artifact.placed").forEach(h => gsap.to(h, { opacity:1, zIndex:10, duration:0.3 }));
       document.querySelectorAll(".decor.placed").forEach(d => gsap.to(d, { opacity:1, duration:0.3 }));
       document.getElementById("scene-dim").classList.remove("active");
